@@ -1,5 +1,19 @@
 import os
+import sys
 from pathlib import Path
+
+# Python 3.14 Django template context compatibility patch
+if sys.version_info >= (3, 14):
+    try:
+        from django.template.context import RenderContext, BaseContext
+        def _render_context_copy(self):
+            duplicate = RenderContext()
+            duplicate.dicts = [d.copy() for d in self.dicts]
+            return duplicate
+        RenderContext.__copy__ = _render_context_copy
+        BaseContext.__copy__ = _render_context_copy
+    except Exception:
+        pass
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
