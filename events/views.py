@@ -531,6 +531,9 @@ def api_events(request):
     if request.user.club:
         data['club'] = request.user.club.id
 
+    for folder in ['event_banners', 'certificate_templates', 'certificates']:
+        os.makedirs(os.path.join(settings.MEDIA_ROOT, folder), exist_ok=True)
+
     if 'banner_image' in request.FILES:
         data['banner_image'] = request.FILES['banner_image']
     if 'certificate_template' in request.FILES:

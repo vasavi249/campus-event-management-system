@@ -49,9 +49,19 @@ function showToast(message, type = 'success') {
 function parseAPIErrorMessage(json) {
     if (!json) return 'An error occurred. Please check input values.';
     if (typeof json === 'string') return json;
-    if (json.message) return json.message;
-    if (json.detail) return json.detail;
-    if (json.error) return json.error;
+    
+    if (json.data && typeof json.data === 'object') {
+        const parts = [];
+        for (const [key, val] of Object.entries(json.data)) {
+            if (Array.isArray(val)) {
+                parts.push(`${key}: ${val.join(', ')}`);
+            } else if (typeof val === 'string') {
+                parts.push(`${key}: ${val}`);
+            }
+        }
+        if (parts.length > 0) return parts.join(' | ');
+    }
+
     if (json.errors) {
         if (typeof json.errors === 'string') return json.errors;
         if (typeof json.errors === 'object') {
@@ -60,6 +70,9 @@ function parseAPIErrorMessage(json) {
                 .join(' | ');
         }
     }
+    if (json.message) return json.message;
+    if (json.detail) return json.detail;
+    if (json.error) return json.error;
     if (typeof json === 'object') {
         const parts = [];
         for (const [key, val] of Object.entries(json)) {
