@@ -92,8 +92,19 @@ class Event(models.Model):
 
     def clean(self):
         if self.deadline and self.date and self.time:
-            event_datetime = timezone.make_aware(timezone.datetime.combine(self.date, self.time))
-            if self.deadline > event_datetime:
+            dt_combined = timezone.datetime.combine(self.date, self.time)
+            if timezone.is_aware(self.deadline):
+                event_datetime = timezone.make_aware(dt_combined, timezone.get_current_timezone())
+            else:
+                event_datetime = dt_combined
+
+            deadline_dt = self.deadline
+            if timezone.is_aware(event_datetime) and timezone.is_naive(deadline_dt):
+                deadline_dt = timezone.make_aware(deadline_dt, timezone.get_current_timezone())
+            elif timezone.is_naive(event_datetime) and timezone.is_aware(deadline_dt):
+                event_datetime = timezone.make_aware(event_datetime, timezone.get_current_timezone())
+
+            if deadline_dt > event_datetime:
                 raise ValidationError({'deadline': 'Registration deadline must be before the event date and time.'})
         
         if self.venue and self.approval_status == 'approved':

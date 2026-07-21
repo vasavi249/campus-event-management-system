@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Count, Avg
 from django.utils import timezone
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -537,7 +538,13 @@ def api_events(request):
 
     serializer = EventSerializer(data=data, context={'request': request})
     if serializer.is_valid():
-        event = serializer.save()
+        try:
+            event = serializer.save()
+        except DjangoValidationError as ve:
+            err_msg = str(ve.message_dict if hasattr(ve, 'message_dict') else ve)
+            return api_response('error', err_msg, http_status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return api_response('error', f"Could not save event: {str(e)}", http_status=status.HTTP_400_BAD_REQUEST)
 
         # Notify Faculty
         faculties = User.objects.filter(role='faculty')
