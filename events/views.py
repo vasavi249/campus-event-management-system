@@ -66,17 +66,6 @@ def about_view(request):
 def contact_view(request):
     return render(request, 'events/contact.html')
 
-def login_view(request):
-    return render(request, 'events/login.html')
-
-def register_view(request):
-    departments = Department.objects.all()
-    clubs = Club.objects.all()
-    return render(request, 'events/register.html', {
-        'departments': departments,
-        'clubs': clubs
-    })
-
 def redirect_user_to_dashboard(user):
     if user.is_superuser or user.role == 'admin':
         return redirect('admin_dashboard')
@@ -85,6 +74,21 @@ def redirect_user_to_dashboard(user):
     elif user.role == 'organizer':
         return redirect('organizer_dashboard')
     return redirect('student_dashboard')
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect_user_to_dashboard(request.user)
+    return render(request, 'events/login.html')
+
+def register_view(request):
+    if request.user.is_authenticated:
+        return redirect_user_to_dashboard(request.user)
+    departments = Department.objects.all()
+    clubs = Club.objects.all()
+    return render(request, 'events/register.html', {
+        'departments': departments,
+        'clubs': clubs
+    })
 
 @login_required
 def student_dashboard_view(request):

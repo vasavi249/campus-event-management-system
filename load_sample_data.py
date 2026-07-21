@@ -51,6 +51,23 @@ def populate():
     admin_user.set_password("admin123")
     admin_user.save()
 
+    vasavi_user, _ = User.objects.get_or_create(
+        username="vasavi",
+        defaults={
+            'email': "vasavi@campus.edu",
+            'first_name': "vasavi",
+            'last_name': "latha",
+            'role': "admin",
+            'is_staff': True,
+            'is_superuser': True
+        }
+    )
+    vasavi_user.role = "admin"
+    vasavi_user.is_staff = True
+    vasavi_user.is_superuser = True
+    vasavi_user.set_password("admin123")
+    vasavi_user.save()
+
     faculty_user, _ = User.objects.get_or_create(
         username="faculty",
         defaults={
