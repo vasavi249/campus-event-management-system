@@ -88,6 +88,7 @@ function parseAPIErrorMessage(json) {
 }
 
 async function fetchAPI(url, options = {}) {
+    options.credentials = 'same-origin';
     const defaultHeaders = {
         'X-CSRFToken': getCookie('csrftoken') || ''
     };
