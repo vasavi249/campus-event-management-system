@@ -68,6 +68,23 @@ def populate():
     vasavi_user.set_password("admin123")
     vasavi_user.save()
 
+    riya_user, _ = User.objects.get_or_create(
+        username="riya",
+        defaults={
+            'email': "riya@campus.edu",
+            'first_name': "Riya",
+            'last_name': "Rithu",
+            'role': "admin",
+            'is_staff': True,
+            'is_superuser': True
+        }
+    )
+    riya_user.role = "admin"
+    riya_user.is_staff = True
+    riya_user.is_superuser = True
+    riya_user.set_password("admin123")
+    riya_user.save()
+
     faculty_user, _ = User.objects.get_or_create(
         username="faculty",
         defaults={

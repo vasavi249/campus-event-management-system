@@ -5,9 +5,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Database (optional - keep seed script load_sample_data.py to populate fresh DB)
-*.sqlite3
-*.db
+# Database
+# db.sqlite3 tracked in git for Render persistent deployment
 
 # Media uploads & static build artifacts
 media/event_banners/*
