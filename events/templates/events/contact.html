@@ -1,0 +1,35 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}Contact Support | Campus Event Management System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="glass-card">
+            <h3 class="fw-bold text-white mb-3"><i class="bi bi-envelope text-primary me-2"></i>Contact Support</h3>
+            <p class="text-muted small mb-4">Have questions regarding event registration or venue approvals? Reach out to campus support.</p>
+
+            <form onsubmit="event.preventDefault(); showToast('Message sent! Support will respond shortly.', 'success');">
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Your Name</label>
+                    <input type="text" class="form-control form-control-glass" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Email Address</label>
+                    <input type="email" class="form-control form-control-glass" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Subject</label>
+                    <input type="text" class="form-control form-control-glass" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Message</label>
+                    <textarea class="form-control form-control-glass" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-glass-primary w-100 py-2"><i class="bi bi-send me-1"></i>Send Message</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

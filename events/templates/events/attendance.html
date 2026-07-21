@@ -1,0 +1,112 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}Live Check-in & Attendance | {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="glass-card">
+            <h3 class="fw-bold text-white mb-1"><i class="bi bi-qr-code-scan text-warning me-2"></i>Live Gate Check-in Terminal</h3>
+            <p class="text-muted small mb-0">Event: <strong class="text-white">{{ event.title }}</strong> &bull; Venue: <span class="text-info">{{ event.venue.venue_name }}</span></p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Scanner / Code Input Column -->
+    <div class="col-12 col-lg-5">
+        <div class="glass-card text-center p-4">
+            <h4 class="fw-bold text-white mb-3">Scan / Type Ticket Code</h4>
+            
+            <form onsubmit="handleCheckinSubmit(event)">
+                <div class="mb-3">
+                    <input type="text" id="ticket_code_input" class="form-control form-control-glass text-center font-monospace fs-4 text-warning text-uppercase" placeholder="EVT-XXXXXX" required autofocus>
+                </div>
+                <button type="submit" class="btn btn-glass-primary btn-lg w-100 py-2"><i class="bi bi-check2-circle me-2"></i>Verify Ticket &amp; Mark Attendance</button>
+            </form>
+
+            <div class="mt-4 p-3 glass-card bg-opacity-25 text-start">
+                <small class="text-muted d-block mb-1"><i class="bi bi-info-circle text-info me-1"></i>Automated Workflow Notice:</small>
+                <small class="text-light opacity-75">Scanning or entering a valid confirmed ticket code instantly marks attendance and automatically generates the student's downloadable participation certificate.</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Live List -->
+    <div class="col-12 col-lg-7">
+        <div class="glass-card">
+            <h5 class="fw-bold text-white mb-3"><i class="bi bi-person-check text-success me-2"></i>Confirmed Attendees</h5>
+
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Roll Number</th>
+                            <th>Ticket ID</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reg in registrations %}
+                            <tr>
+                                <td class="fw-bold text-white">{{ reg.student.full_name }}</td>
+                                <td class="font-monospace text-info small">{{ reg.student.roll_number|default:"N/A" }}</td>
+                                <td>
+                                    <span class="badge bg-dark text-warning border border-secondary font-monospace p-2" 
+                                          style="cursor: pointer;" 
+                                          title="Click to copy into input box" 
+                                          onclick="fillTicketCode('{{ reg.ticket_code }}')">
+                                        {{ reg.ticket_code }} <i class="bi bi-arrow-left-short ms-1"></i>
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if reg.attendance == 'present' %}
+                                        <span class="badge badge-approved"><i class="bi bi-check-circle me-1"></i>Present</span>
+                                    {% else %}
+                                        <span class="badge badge-pending">Absent</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if reg.attendance != 'present' %}
+                                        <button type="button" class="btn btn-success btn-sm" onclick="quickMarkAttendance('{{ reg.ticket_code }}')">
+                                            <i class="bi bi-check-lg me-1"></i>Mark Present
+                                        </button>
+                                    {% else %}
+                                        <span class="text-success small"><i class="bi bi-check-all"></i> Verified</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function fillTicketCode(code) {
+        const input = document.getElementById('ticket_code_input');
+        if (input) {
+            input.value = code;
+            input.focus();
+            showToast(`Ticket code ${code} copied to input!`, 'info');
+        }
+    }
+
+    async function quickMarkAttendance(code) {
+        const res = await apiCall('/api/attendance/checkin/', 'POST', { ticket_code: code });
+        if (res.success) {
+            showToast(res.message || 'Attendance marked successfully!', 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showToast(res.error || 'Failed to mark attendance.', 'error');
+        }
+    }
+</script>
+{% endblock %}

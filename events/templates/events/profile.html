@@ -1,0 +1,154 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}Profile Settings | Campus Event Management System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-3">
+    <div class="col-12 col-md-10 col-lg-8">
+        <div class="glass-card">
+            <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-4 flex-wrap gap-2">
+                <div>
+                    <h3 class="fw-bold text-white mb-1"><i class="bi bi-person-badge text-primary me-2"></i>Profile Settings</h3>
+                    <p class="text-muted small mb-0">Manage your personal details, campus identity, and account credentials</p>
+                </div>
+                <div>
+                    <span class="badge bg-primary fs-6 font-monospace px-3 py-2 text-uppercase">
+                        <i class="bi bi-shield-check me-1"></i>{{ request.user.role }}
+                    </span>
+                </div>
+            </div>
+
+            <form id="profile-update-form" onsubmit="handleProfileUpdate(event)">
+                <div class="row g-3">
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label text-white">First Name *</label>
+                        <input type="text" id="first_name" class="form-control form-control-glass" value="{{ request.user.first_name }}" required>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label text-white">Last Name *</label>
+                        <input type="text" id="last_name" class="form-control form-control-glass" value="{{ request.user.last_name }}" required>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label text-white">Username</label>
+                        <input type="text" class="form-control form-control-glass text-muted" value="{{ request.user.username }}" disabled readonly>
+                        <small class="text-muted">Username cannot be changed.</small>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label text-white">Email Address *</label>
+                        <input type="email" id="email" class="form-control form-control-glass" value="{{ request.user.email }}" required>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label text-white">Phone Number</label>
+                        <input type="text" id="phone" class="form-control form-control-glass" value="{{ request.user.phone|default:'' }}" placeholder="+91 9876543210">
+                    </div>
+
+                    {% if request.user.role == 'student' %}
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label text-white">Roll Number / Student ID</label>
+                            <input type="text" id="roll_number" class="form-control form-control-glass font-monospace" value="{{ request.user.roll_number|default:'' }}" placeholder="e.g. CSE-2026-045">
+                        </div>
+                    {% endif %}
+
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label text-white">Department</label>
+                        <select id="department" class="form-select form-control-glass">
+                            <option value="">Select Department</option>
+                            {% for dept in departments %}
+                                <option value="{{ dept.id }}" {% if request.user.department and request.user.department.id == dept.id %}selected{% endif %}>
+                                    {{ dept.name }} ({{ dept.code }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {% if request.user.role == 'organizer' %}
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label text-white">Associated Club</label>
+                            <select id="club" class="form-select form-control-glass">
+                                <option value="">Select Club</option>
+                                {% for club in clubs %}
+                                    <option value="{{ club.id }}" {% if request.user.club and request.user.club.id == club.id %}selected{% endif %}>
+                                        {{ club.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% endif %}
+
+                    <div class="col-12">
+                        <hr class="border-secondary my-3">
+                        <h5 class="fw-bold text-white mb-2"><i class="bi bi-key text-warning me-2"></i>Change Password (Optional)</h5>
+                        <p class="text-muted small">Leave blank if you do not want to change your password.</p>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label text-white">New Password</label>
+                        <input type="password" id="new_password" class="form-control form-control-glass" placeholder="Minimum 6 characters" autocomplete="new-password">
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label text-white">Confirm New Password</label>
+                        <input type="password" id="confirm_new_password" class="form-control form-control-glass" placeholder="Re-enter new password" autocomplete="new-password">
+                    </div>
+                </div>
+
+                <div class="mt-4 text-end">
+                    <button type="submit" class="btn btn-glass-primary px-4 py-2 fs-6"><i class="bi bi-save me-1"></i>Save Profile Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function handleProfileUpdate(e) {
+        e.preventDefault();
+
+        const pass = document.getElementById('new_password').value;
+        const confirmPass = document.getElementById('confirm_new_password').value;
+
+        if (pass && pass !== confirmPass) {
+            showToast('New passwords do not match.', 'error');
+            return;
+        }
+
+        const payload = {
+            first_name: document.getElementById('first_name').value.trim(),
+            last_name: document.getElementById('last_name').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            department: document.getElementById('department').value
+        };
+
+        const rollInput = document.getElementById('roll_number');
+        if (rollInput) {
+            payload.roll_number = rollInput.value.trim();
+        }
+
+        const clubInput = document.getElementById('club');
+        if (clubInput) {
+            payload.club = clubInput.value;
+        }
+
+        if (pass) {
+            payload.new_password = pass;
+        }
+
+        const res = await apiCall('/api/profile/update/', 'POST', payload);
+
+        if (res.success) {
+            showToast('Profile updated successfully!', 'success');
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showToast(res.error || res.message || 'Failed to update profile.', 'error');
+        }
+    }
+</script>
+{% endblock %}

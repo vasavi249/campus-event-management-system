@@ -1,0 +1,98 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}Sign In | Campus Event Management System{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 75vh;">
+    <div class="col-12 col-md-8 col-lg-5">
+        <div class="glass-card p-4 p-sm-5 text-center">
+            <div class="mb-4">
+                <i class="bi bi-shield-lock-fill text-primary" style="font-size: 3.2rem;"></i>
+                <h3 class="fw-bold text-white mt-2 mb-1">Sign In</h3>
+                <p class="text-light opacity-75 small">Access your campus dashboard and digital passes</p>
+            </div>
+            
+            <form id="login-form" onsubmit="handleLoginSubmit(event)" class="text-start">
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary text-primary"><i class="bi bi-person-fill"></i></span>
+                        <input type="text" id="username" class="form-control form-control-glass" placeholder="Enter username" required autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <label class="form-label mb-0">Password</label>
+                        <a href="#" onclick="handleForgotPassword(event)" class="small text-primary text-decoration-none fw-bold">Forgot password?</a>
+                    </div>
+                    <div class="input-group mt-1">
+                        <span class="input-group-text bg-dark border-secondary text-primary"><i class="bi bi-key-fill"></i></span>
+                        <input type="password" id="password" class="form-control form-control-glass" placeholder="Enter password" required autocomplete="current-password">
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-glass-primary w-100 py-2 fs-5"><i class="bi bi-box-arrow-in-right me-2"></i>Sign In</button>
+                </div>
+            </form>
+
+            <div class="text-center mt-4">
+                <p class="mb-0 text-light opacity-75 small">Don't have an account? <a href="{% url 'register_page' %}" class="fw-bold text-primary text-decoration-none">Create Account</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function handleLoginSubmit(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        
+        const res = await apiCall('/api/auth/login/', 'POST', { username, password });
+        
+        if (res.success) {
+            if (res.data && res.data.token) {
+                localStorage.setItem('auth_token', res.data.token);
+                localStorage.setItem('user_role', res.data.user.role);
+            }
+            
+            showToast(res.message || 'Login successful!', 'success');
+            
+            setTimeout(() => {
+                const userObj = res.data.user || res.data;
+                const role = userObj.role;
+                if (role === 'admin') {
+                    window.location.href = '/dashboard/admin/';
+                } else if (role === 'faculty') {
+                    window.location.href = '/dashboard/faculty/';
+                } else if (role === 'organizer') {
+                    window.location.href = '/dashboard/organizer/';
+                } else {
+                    window.location.href = '/dashboard/student/';
+                }
+            }, 1000);
+        } else {
+            showToast(res.error || res.message || 'Invalid username or password.', 'error');
+        }
+    }
+
+    async function handleForgotPassword(e) {
+        e.preventDefault();
+        const email = prompt("Enter your registered email address for recovery:");
+        if (email) {
+            const res = await apiCall('/api/auth/forgot-password/', 'POST', { email });
+            if (res.success) {
+                showToast(res.message || 'Instructions sent to your email.', 'success');
+            } else {
+                showToast(res.error || 'User not found.', 'error');
+            }
+        }
+    }
+</script>
+{% endblock %}

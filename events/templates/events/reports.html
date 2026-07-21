@@ -1,0 +1,62 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}Reports &amp; Analytics | Campus Event Management System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="glass-card d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h3 class="fw-bold text-white mb-1"><i class="bi bi-file-earmark-bar-graph text-info me-2"></i>Event Performance &amp; Analytics Reports</h3>
+                <p class="text-muted small mb-0">Export system records and evaluate department attendance trends</p>
+            </div>
+            <div>
+                <a href="/api/reports/csv/" class="btn btn-glass-primary"><i class="bi bi-download me-1"></i>Download CSV Report</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12">
+        <div class="glass-card">
+            <h5 class="fw-bold text-white mb-4"><i class="bi bi-table text-warning me-2"></i>Master Event Summary</h5>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Date</th>
+                            <th>Venue</th>
+                            <th>Status</th>
+                            <th>Approval</th>
+                            <th>Registrations</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in events %}
+                            <tr>
+                                <td>#{{ event.event_id }}</td>
+                                <td class="fw-bold text-white">{{ event.title }}</td>
+                                <td><span class="badge bg-secondary">{{ event.category.name }}</span></td>
+                                <td class="small text-muted">{{ event.date }}</td>
+                                <td class="small">{{ event.venue.venue_name|default:"TBA" }}</td>
+                                <td><span class="badge bg-info text-dark">{{ event.status }}</span></td>
+                                <td>
+                                    <span class="badge {% if event.approval_status == 'approved' %}badge-approved{% else %}badge-pending{% endif %}">
+                                        {{ event.approval_status }}
+                                    </span>
+                                </td>
+                                <td class="fw-bold text-info">{{ event.registrations.count }} / {{ event.max_participants }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,188 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}Create Account | Campus Event Management System{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center my-3" style="min-height: 80vh;">
+    <div class="col-12 col-md-10 col-lg-7">
+        <div class="glass-card p-4 p-sm-5">
+            <div class="text-center mb-4">
+                <i class="bi bi-person-plus-fill text-primary" style="font-size: 3.2rem;"></i>
+                <h3 class="fw-bold text-white mt-2 mb-1">Create Account</h3>
+                <p class="text-light opacity-75 small">Register to discover, schedule, or approve campus events</p>
+            </div>
+            
+            <form id="register-form" onsubmit="handleRegisterSubmit(event)">
+                <div class="row g-3">
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">First Name *</label>
+                        <input type="text" id="first_name" class="form-control form-control-glass" placeholder="e.g. John" required>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Last Name *</label>
+                        <input type="text" id="last_name" class="form-control form-control-glass" placeholder="e.g. Doe" required>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Username *</label>
+                        <input type="text" id="username" class="form-control form-control-glass" placeholder="Choose unique username" required autocomplete="username">
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" id="email" class="form-control form-control-glass" placeholder="student@campus.edu" required>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Phone Number</label>
+                        <input type="text" id="phone" class="form-control form-control-glass" placeholder="+1234567890">
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">User Role *</label>
+                        <select id="role" class="form-select form-control-glass" onchange="toggleRoleFields()" required>
+                            <option value="student" selected>Student</option>
+                            <option value="organizer">Event Organizer</option>
+                            <option value="faculty">Faculty Member</option>
+                            <option value="admin">System Administrator</option>
+                        </select>
+                    </div>
+
+                    <!-- Student Fields -->
+                    <div class="col-12 col-sm-6 role-field student-field">
+                        <label class="form-label">Roll Number / Student ID *</label>
+                        <input type="text" id="roll_number" class="form-control form-control-glass" placeholder="e.g. CSE-2026-045">
+                    </div>
+                    
+                    <!-- Department selection -->
+                    <div class="col-12 col-sm-6 role-field student-field faculty-field">
+                        <label class="form-label">Department *</label>
+                        <select id="department" class="form-select form-control-glass">
+                            <option value="">Select Department</option>
+                            {% for dept in departments %}
+                                <option value="{{ dept.id }}">{{ dept.name }} ({{ dept.code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Organizer Fields -->
+                    <div class="col-12 col-sm-6 role-field organizer-field" style="display: none;">
+                        <label class="form-label">Associated Club *</label>
+                        <select id="club" class="form-select form-control-glass">
+                            <option value="">Select Club</option>
+                            {% for club in clubs %}
+                                <option value="{{ club.id }}">{{ club.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Password *</label>
+                        <input type="password" id="password" class="form-control form-control-glass" placeholder="Enter password" required autocomplete="new-password">
+                    </div>
+                    
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Confirm Password *</label>
+                        <input type="password" id="confirm_password" class="form-control form-control-glass" placeholder="Confirm password" required autocomplete="new-password">
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-glass-primary w-100 py-2 fs-5"><i class="bi bi-person-plus me-2"></i>Sign Up</button>
+                </div>
+            </form>
+
+            <div class="text-center mt-4">
+                <p class="mb-0 text-light opacity-75 small">Already have an account? <a href="{% url 'login_page' %}" class="fw-bold text-primary text-decoration-none">Sign In</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleRoleFields() {
+        const role = document.getElementById('role').value;
+        const allFields = document.querySelectorAll('.role-field');
+        allFields.forEach(f => f.style.display = 'none');
+        
+        if (role === 'student') {
+            document.querySelectorAll('.student-field').forEach(f => f.style.display = 'block');
+        } else if (role === 'faculty') {
+            document.querySelectorAll('.faculty-field').forEach(f => f.style.display = 'block');
+        } else if (role === 'organizer') {
+            document.querySelectorAll('.organizer-field').forEach(f => f.style.display = 'block');
+        }
+    }
+
+    async function handleRegisterSubmit(e) {
+        e.preventDefault();
+        
+        const first_name = document.getElementById('first_name').value.trim();
+        const last_name = document.getElementById('last_name').value.trim();
+        const username = document.getElementById('username').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const role = document.getElementById('role').value;
+        const password = document.getElementById('password').value;
+        const confirm_password = document.getElementById('confirm_password').value;
+        
+        if (password !== confirm_password) {
+            showToast('Passwords do not match.', 'error');
+            return;
+        }
+
+        const payload = {
+            first_name,
+            last_name,
+            username,
+            email,
+            phone,
+            role,
+            password
+        };
+
+        if (role === 'student') {
+            payload.roll_number = document.getElementById('roll_number').value.trim();
+            payload.department = document.getElementById('department').value;
+            if (!payload.roll_number || !payload.department) {
+                showToast('Roll number and Department are required for students.', 'error');
+                return;
+            }
+        } else if (role === 'faculty') {
+            payload.department = document.getElementById('department').value;
+            if (!payload.department) {
+                showToast('Department is required for faculty.', 'error');
+                return;
+            }
+        } else if (role === 'organizer') {
+            payload.club = document.getElementById('club').value;
+            if (!payload.club) {
+                showToast('Associated club selection is required for organizers.', 'error');
+                return;
+            }
+        }
+
+        const res = await apiCall('/api/auth/register/', 'POST', payload);
+
+        if (res.success) {
+            if (res.data && res.data.token) {
+                localStorage.setItem('auth_token', res.data.token);
+            }
+            showToast('Account created successfully!', 'success');
+            
+            setTimeout(() => {
+                if (role === 'faculty') {
+                    window.location.href = '/dashboard/faculty/';
+                } else if (role === 'organizer') {
+                    window.location.href = '/dashboard/organizer/';
+                } else {
+                    window.location.href = '/dashboard/student/';
+                }
+            }, 1000);
+        } else {
+            showToast(res.error || res.message || 'Registration failed.', 'error');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', toggleRoleFields);
+</script>
+{% endblock %}

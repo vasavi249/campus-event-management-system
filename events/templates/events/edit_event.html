@@ -1,0 +1,185 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}Edit Event | {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="glass-card">
+            <h3 class="fw-bold text-white mb-4"><i class="bi bi-pencil-square text-warning me-2"></i>Edit Event Details</h3>
+
+            <form id="edit-event-form" onsubmit="handleEditEventSubmit(event)">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label text-muted small">Event Title *</label>
+                        <input type="text" id="title" class="form-control form-control-glass" value="{{ event.title }}" required>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label text-muted small">Category *</label>
+                        <select id="category" class="form-select form-control-glass" required>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}" {% if cat.id == event.category.id %}selected{% endif %}>{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label text-muted small">Venue *</label>
+                        <select id="venue" class="form-select form-control-glass" required>
+                            {% for v in venues %}
+                                <option value="{{ v.venue_id }}" {% if v.venue_id == event.venue.venue_id %}selected{% endif %}>{{ v.venue_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-sm-3">
+                        <label class="form-label">Event Date *</label>
+                        <input type="date" id="date" class="form-control form-control-glass" value="{{ event.date|date:'Y-m-d' }}" required>
+                    </div>
+
+                    <div class="col-12 col-sm-3">
+                        <label class="form-label">Event Time *</label>
+                        <input type="time" id="time" class="form-control form-control-glass" value="{{ event.time|time:'H:i' }}" required>
+                    </div>
+
+                    <div class="col-12 col-sm-3">
+                        <label class="form-label">Max Participants *</label>
+                        <input type="number" id="max_participants" class="form-control form-control-glass" value="{{ event.max_participants }}" required>
+                    </div>
+
+                    <div class="col-12 col-sm-3">
+                        <label class="form-label">Fee per Member (₹)</label>
+                        <input type="number" id="registration_fee" class="form-control form-control-glass" value="{{ event.registration_fee }}" step="0.01" min="0">
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-white fw-bold"><i class="bi bi-image text-info me-1"></i>Event Banner / Poster Image</label>
+                        <input type="file" id="banner_image" class="form-control form-control-glass" accept="image/*" onchange="previewEditBannerImage(event)">
+                        
+                        {% if event.banner_image %}
+                            <div class="mt-2" id="current-banner-box">
+                                <small class="text-muted d-block mb-1">Current Poster Banner:</small>
+                                <img id="edit-banner-preview" src="{{ event.banner_image.url }}" alt="Current Poster" class="img-fluid rounded-3 border border-secondary" style="max-height: 140px; object-fit: cover;">
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-outline-warning btn-sm" onclick="handleRemoveBanner()">
+                                        <i class="bi bi-x-circle me-1"></i>Remove Current Poster Image
+                                    </button>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="mt-2" id="current-banner-box" style="display: none;">
+                                <small class="text-muted d-block mb-1">New Poster Preview:</small>
+                                <img id="edit-banner-preview" src="" alt="Poster Preview" class="img-fluid rounded-3 border border-secondary" style="max-height: 140px; object-fit: cover;">
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-white fw-bold"><i class="bi bi-award text-warning me-1"></i>Event Certificate Template Background Image</label>
+                        <input type="file" id="certificate_template" class="form-control form-control-glass" accept="image/*">
+                        {% if event.certificate_template %}
+                            <div class="mt-2">
+                                <small class="text-muted d-block mb-1">Uploaded Certificate Template Image:</small>
+                                <img src="{{ event.certificate_template.url }}" alt="Certificate Template" class="img-fluid rounded-3 border border-warning" style="max-height: 140px; object-fit: cover;">
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label text-muted small">Description *</label>
+                        <textarea id="description" class="form-control form-control-glass" rows="4" required>{{ event.description }}</textarea>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline-danger px-4" onclick="handleDeleteEvent()"><i class="bi bi-trash me-1"></i>Delete Event</button>
+                    <div class="d-flex gap-2">
+                        <a href="javascript:history.back()" class="btn btn-glass-secondary px-4">Cancel</a>
+                        <button type="submit" class="btn btn-glass-primary px-4"><i class="bi bi-save me-1"></i>Save Changes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function handleRemoveBanner() {
+        if (!confirm('Are you sure you want to remove the poster image for this event?')) return;
+        const formData = new FormData();
+        formData.append('remove_banner', 'true');
+
+        const res = await apiCall('/api/events/{{ event.event_id }}/', 'PUT', formData);
+        if (res.success) {
+            showToast('Poster image removed!', 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showToast(res.error || 'Failed to remove poster.', 'error');
+        }
+    }
+
+    async function handleDeleteEvent() {
+        if (!confirm('Are you sure you want to PERMANENTLY DELETE this event? This action cannot be undone.')) return;
+        const res = await apiCall('/api/events/{{ event.event_id }}/', 'DELETE');
+        if (res.success) {
+            showToast('Event deleted successfully!', 'success');
+            setTimeout(() => window.location.href = '/dashboard/admin/', 1200);
+        } else {
+            showToast(res.error || 'Failed to delete event.', 'error');
+        }
+    }
+    function previewEditBannerImage(event) {
+        const file = event.target.files[0];
+        const box = document.getElementById('current-banner-box');
+        const img = document.getElementById('edit-banner-preview');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                box.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    async function handleEditEventSubmit(e) {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append('title', document.getElementById('title').value.trim());
+        formData.append('category', document.getElementById('category').value);
+        formData.append('venue', document.getElementById('venue').value);
+        formData.append('date', document.getElementById('date').value);
+        formData.append('time', document.getElementById('time').value);
+        formData.append('max_participants', parseInt(document.getElementById('max_participants').value));
+        formData.append('registration_fee', parseFloat(document.getElementById('registration_fee').value || 0));
+        formData.append('description', document.getElementById('description').value.trim());
+
+        const fileInput = document.getElementById('banner_image');
+        if (fileInput.files.length > 0) {
+            formData.append('banner_image', fileInput.files[0]);
+        }
+
+        const certInput = document.getElementById('certificate_template');
+        if (certInput && certInput.files.length > 0) {
+            formData.append('certificate_template', certInput.files[0]);
+        }
+
+        const res = await apiCall('/api/events/{{ event.event_id }}/', 'PUT', formData);
+
+        if (res.success) {
+            showToast('Event updated successfully!', 'success');
+            setTimeout(() => {
+                window.location.href = '/dashboard/organizer/';
+            }, 1200);
+        } else {
+            showToast(res.error || 'Failed to update event.', 'error');
+        }
+    }
+</script>
+{% endblock %}

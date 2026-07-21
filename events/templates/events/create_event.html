@@ -1,0 +1,141 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}Create Event | Campus Event Management System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="glass-card">
+            <h3 class="fw-bold text-white mb-4"><i class="bi bi-calendar-plus text-primary me-2"></i>Create New Campus Event</h3>
+
+            <form id="create-event-form" onsubmit="handleCreateEventSubmit(event)">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label text-muted small">Event Title *</label>
+                        <input type="text" id="title" class="form-control form-control-glass" placeholder="e.g. AI Hackathon 2026" required>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label text-muted small">Category *</label>
+                        <select id="category" class="form-select form-control-glass" required>
+                            <option value="">Select Category</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label text-muted small">Venue *</label>
+                        <select id="venue" class="form-select form-control-glass" required>
+                            <option value="">Select Venue</option>
+                            {% for v in venues %}
+                                <option value="{{ v.venue_id }}">{{ v.venue_name }} (Cap: {{ v.capacity }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label text-muted small">Event Date *</label>
+                        <input type="date" id="date" class="form-control form-control-glass" required>
+                    </div>
+
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label text-muted small">Event Time *</label>
+                        <input type="time" id="time" class="form-control form-control-glass" required>
+                    </div>
+
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label text-muted small">Max Participants *</label>
+                        <input type="number" id="max_participants" class="form-control form-control-glass" value="100" min="1" required>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Registration Deadline *</label>
+                        <input type="datetime-local" id="deadline" class="form-control form-control-glass" required>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label">Registration Fee per Member (₹)</label>
+                        <input type="number" id="registration_fee" class="form-control form-control-glass" value="0.00" step="0.01" min="0">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label text-white fw-bold"><i class="bi bi-image text-info me-1"></i>Event Banner / Poster Image</label>
+                        <input type="file" id="banner_image" class="form-control form-control-glass" accept="image/*" onchange="previewBannerImage(event)">
+                        <div class="form-text text-muted small">Upload high-resolution event banner (PNG, JPG, WebP). Max 5MB.</div>
+                        <div id="banner-preview-container" class="mt-2" style="display: none;">
+                            <img id="banner-preview" src="" alt="Poster Preview" class="img-fluid rounded-3 border border-secondary" style="max-height: 160px; object-fit: cover;">
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label text-muted small">Description *</label>
+                        <textarea id="description" class="form-control form-control-glass" rows="4" placeholder="Detailed event description, rules, and schedules..." required></textarea>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex justify-content-between">
+                    <a href="{% url 'organizer_dashboard' %}" class="btn btn-glass-secondary px-4">Cancel</a>
+                    <button type="submit" class="btn btn-glass-primary px-4"><i class="bi bi-send me-1"></i>Submit for Faculty Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function previewBannerImage(event) {
+        const file = event.target.files[0];
+        const container = document.getElementById('banner-preview-container');
+        const img = document.getElementById('banner-preview');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                container.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
+    async function handleCreateEventSubmit(e) {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append('title', document.getElementById('title').value.trim());
+        formData.append('category', document.getElementById('category').value);
+        formData.append('venue', document.getElementById('venue').value);
+        formData.append('date', document.getElementById('date').value);
+        formData.append('time', document.getElementById('time').value);
+        formData.append('max_participants', parseInt(document.getElementById('max_participants').value));
+        formData.append('deadline', document.getElementById('deadline').value);
+        formData.append('registration_fee', parseFloat(document.getElementById('registration_fee').value || 0));
+        formData.append('description', document.getElementById('description').value.trim());
+        formData.append('status', 'published');
+        formData.append('approval_status', 'pending');
+
+        const fileInput = document.getElementById('banner_image');
+        if (fileInput.files.length > 0) {
+            formData.append('banner_image', fileInput.files[0]);
+        }
+
+        const res = await apiCall('/api/events/', 'POST', formData);
+
+        if (res.success) {
+            showToast('Event created successfully and sent for approval!', 'success');
+            setTimeout(() => {
+                window.location.href = '/dashboard/organizer/';
+            }, 1200);
+        } else {
+            showToast(res.error || 'Failed to create event.', 'error');
+        }
+    }
+</script>
+{% endblock %}

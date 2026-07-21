@@ -1,0 +1,30 @@
+# Python / Django gitignore
+*.pyc
+*__pycache__*
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Database (optional - keep seed script load_sample_data.py to populate fresh DB)
+*.sqlite3
+*.db
+
+# Media uploads & static build artifacts
+media/event_banners/*
+media/certificate_templates/*
+media/certificates/*
+!media/event_banners/.gitkeep
+!media/certificate_templates/.gitkeep
+!media/certificates/.gitkeep
+
+# Environment variables & local IDE settings
+.env
+.env.local
+.vscode/
+.idea/
+*.log
+*.swp
+*.ds_store
+staticfiles/
+powershell.cmd
+index.html

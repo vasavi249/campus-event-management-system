@@ -1,0 +1,206 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}Home | Campus Event Management System{% endblock %}
+
+{% block content %}
+<!-- Hero Banner -->
+<div class="row align-items-center mb-5 py-4">
+    <div class="col-lg-7">
+        <span class="badge bg-primary bg-opacity-25 text-primary border border-primary px-3 py-2 rounded-pill mb-3">
+            <i class="bi bi-stars me-1"></i> Centralized Campus Platform
+        </span>
+        <h1 class="display-4 fw-extrabold text-white mb-3">
+            Plan &bull; Register &bull; Participate &bull; <span class="text-transparent bg-clip-text bg-gradient-to-r text-primary">Celebrate.</span>
+        </h1>
+        <p class="lead text-muted mb-4">
+            Discover upcoming hackathons, cultural festivals, workshops, and sports competitions. Manage your digital QR event passes and download verified certificates seamlessly.
+        </p>
+        
+        <div class="d-flex flex-wrap gap-3">
+            <a href="#events-section" class="btn btn-glass-primary btn-lg px-4 py-2">
+                <i class="bi bi-compass me-2"></i>Explore Events
+            </a>
+            {% if not request.user.is_authenticated %}
+                <a href="{% url 'register_page' %}" class="btn btn-glass-secondary btn-lg px-4 py-2">
+                    <i class="bi bi-person-plus me-2"></i>Create Student Pass
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col-lg-5 mt-4 mt-lg-0 text-center">
+        <div class="glass-card p-4 position-relative">
+            <div class="row g-3">
+                <div class="col-6">
+                    <div class="stat-card">
+                        <i class="bi bi-calendar-check text-primary fs-1"></i>
+                        <h2 class="fw-bold text-white mt-2 mb-0">{{ total_events }}</h2>
+                        <small class="text-muted">Active Campus Events</small>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="stat-card">
+                        <i class="bi bi-people text-emerald fs-1" style="color: #10b981;"></i>
+                        <h2 class="fw-bold text-white mt-2 mb-0">{{ total_students }}</h2>
+                        <small class="text-muted">Registered Students</small>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="stat-card">
+                        <i class="bi bi-qr-code text-warning fs-1"></i>
+                        <h2 class="fw-bold text-white mt-2 mb-0">100%</h2>
+                        <small class="text-muted">Digital Pass Verification</small>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="stat-card">
+                        <i class="bi bi-award text-info fs-1"></i>
+                        <h2 class="fw-bold text-white mt-2 mb-0">Auto</h2>
+                        <small class="text-muted">Certificate Generation</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search & Categories Section -->
+<div id="events-section" class="row mb-4">
+    <div class="col-12">
+        <div class="glass-card mb-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary text-primary"><i class="bi bi-search"></i></span>
+                        <input type="text" id="event-search-input" class="form-control form-control-glass" placeholder="Search events by title or keywords..." onkeyup="filterEvents()">
+                    </div>
+                </div>
+                
+                <div class="col-md-6 d-flex justify-content-md-end gap-2 overflow-x-auto pb-2 pb-md-0">
+                    <button class="btn btn-glass-secondary btn-sm active category-btn" onclick="filterCategory('all', this)">All Categories</button>
+                    {% for cat in categories %}
+                        <button class="btn btn-glass-secondary btn-sm category-btn" onclick="filterCategory('{{ cat.id }}', this)">{{ cat.name }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category-Grouped Events Listing -->
+<div id="category-events-container">
+    {% for cat in categories %}
+        {% if cat.events.all %}
+            <div class="category-section mb-5" data-category-id="{{ cat.id }}">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="p-2 rounded-3 bg-primary bg-opacity-25 me-3 text-primary">
+                        <i class="bi bi-collection-play-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold text-white mb-0">{{ cat.name }}</h3>
+                        <small class="text-muted">{{ cat.description }}</small>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    {% for event in cat.events.all %}
+                        {% if event.approval_status == 'approved' and event.status == 'published' %}
+                            <div class="col-12 col-md-6 col-lg-4 event-card-item" data-category="{{ cat.id }}" data-category-name="{{ cat.name|lower }}" data-title="{{ event.title|lower }}">
+                                <div class="glass-card h-100 d-flex flex-column justify-content-between p-3 position-relative overflow-hidden" style="transition: transform 0.25s ease, box-shadow 0.25s ease;">
+                                    <div>
+                                        <!-- Event Banner / Poster Image -->
+                                        {% if event.banner_image %}
+                                            <div class="position-relative overflow-hidden rounded-3 mb-3" style="height: 180px;">
+                                                <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" class="w-100 h-100" style="object-fit: cover;">
+                                            </div>
+                                        {% else %}
+                                            <div class="rounded-3 mb-3 d-flex flex-column align-items-center justify-content-center text-center p-3 position-relative overflow-hidden" style="height: 180px; background: linear-gradient(135deg, rgba(79, 70, 229, 0.45), rgba(147, 51, 234, 0.45)), #0f172a; border: 1px solid rgba(255,255,255,0.15);">
+                                                <i class="bi bi-ticket-perforated text-primary mb-2 opacity-75" style="font-size: 2.8rem;"></i>
+                                                <span class="fw-bold text-white fs-6 text-truncate px-2">{{ event.title }}</span>
+                                                <small class="text-info opacity-75 font-monospace mt-1">{{ cat.name }}</small>
+                                            </div>
+                                        {% endif %}
+
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge bg-primary bg-opacity-25 text-primary border border-primary px-3 py-1">
+                                                {{ cat.name }}
+                                            </span>
+                                            <span class="badge bg-success bg-opacity-25 text-success border border-success px-2 py-1 font-monospace fw-bold">
+                                                {% if event.registration_fee > 0 %}₹{{ event.registration_fee }}{% else %}Free{% endif %}
+                                            </span>
+                                        </div>
+
+                                        <h4 class="fw-bold text-white mb-2 fs-5">{{ event.title }}</h4>
+                                        <p class="text-muted small mb-3 text-truncate-2">{{ event.description|truncatewords:16 }}</p>
+
+                                        <div class="text-light small space-y-1 mb-3">
+                                            <div><i class="bi bi-calendar-event text-primary me-2"></i>{{ event.date }} at {{ event.time }}</div>
+                                            <div><i class="bi bi-geo-alt text-warning me-2"></i>{{ event.venue.venue_name|default:"TBA" }}</div>
+                                            <div><i class="bi bi-clock-history text-danger me-2"></i>Deadline: {{ event.deadline|date:"M d, Y H:i" }}</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                                        <small class="text-muted"><i class="bi bi-person me-1"></i>{{ event.organizer.username }}</small>
+                                        <a href="{% url 'event_detail_page' event.event_id %}" class="btn btn-glass-primary btn-sm px-3">
+                                            View Details <i class="bi bi-arrow-right ms-1"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% empty %}
+        <div class="glass-card text-center py-5">
+            <i class="bi bi-calendar-x text-muted fs-1"></i>
+            <h4 class="text-muted mt-3">No active events found.</h4>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function filterEvents() {
+        const query = document.getElementById('event-search-input').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.event-card-item');
+
+        cards.forEach(card => {
+            const title = (card.getAttribute('data-title') || '').toLowerCase();
+            const categoryName = (card.getAttribute('data-category-name') || '').toLowerCase();
+            const isMatch = title.includes(query) || categoryName.includes(query);
+            card.style.display = isMatch ? 'block' : 'none';
+        });
+
+        updateCategorySectionVisibilities();
+    }
+
+    function filterCategory(catId, btn) {
+        document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active', 'btn-glass-primary'));
+        btn.classList.add('active', 'btn-glass-primary');
+
+        const sections = document.querySelectorAll('.category-section');
+        sections.forEach(section => {
+            const secCatId = section.getAttribute('data-category-id');
+            if (catId === 'all' || secCatId === catId) {
+                section.style.display = 'block';
+                section.querySelectorAll('.event-card-item').forEach(card => card.style.display = 'block');
+            } else {
+                section.style.display = 'none';
+            }
+        });
+    }
+
+    function updateCategorySectionVisibilities() {
+        const sections = document.querySelectorAll('.category-section');
+        sections.forEach(section => {
+            const visibleCards = Array.from(section.querySelectorAll('.event-card-item')).filter(card => card.style.display !== 'none');
+            section.style.display = visibleCards.length > 0 ? 'block' : 'none';
+        });
+    }
+</script>
+{% endblock %}

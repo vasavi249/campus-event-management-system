@@ -1,0 +1,177 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}My Certificates | Campus Event Management System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="glass-card d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h3 class="fw-bold text-white mb-1"><i class="bi bi-award-fill text-warning me-2"></i>My Event Certificates</h3>
+                <p class="text-muted small mb-0">Verified participation certificates issued by department faculty</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for cert in certificates %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="glass-card border-warning text-center p-4">
+                <i class="bi bi-patch-check-fill text-warning display-4 mb-2"></i>
+                <h5 class="fw-bold text-white mb-1">{{ cert.event.title }}</h5>
+                <p class="text-info small mb-2"><i class="bi bi-calendar-event me-1"></i>{{ cert.event.date }} &bull; {{ cert.event.time }}</p>
+                <p class="text-muted small mb-3">Issued: {{ cert.issue_date|date:"M d, Y" }}</p>
+                
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-glass-primary btn-sm flex-grow-1" 
+                            onclick="openVisualCertificateModal('{{ cert.event.title|escapejs }}', '{{ request.user.full_name|escapejs }}', '{{ request.user.roll_number|default:"N/A"|escapejs }}', '{{ request.user.department.name|default:"Campus Department"|escapejs }}', '{{ cert.event.date }}', '{{ cert.event.time }}', '{{ cert.event.venue.venue_name|default:"Auditorium"|escapejs }}', '{{ cert.event.certificate_template.url|default:"" }}')">
+                        <i class="bi bi-eye me-1"></i>View Certificate
+                    </button>
+                    <a href="/api/certificates/{{ cert.certificate_id }}/download/" class="btn btn-glass-secondary btn-sm" title="Download Text Copy">
+                        <i class="bi bi-download"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="glass-card p-5">
+                <i class="bi bi-award text-muted display-3 mb-3"></i>
+                <h5 class="text-white fw-bold">No Certificates Issued Yet</h5>
+                <p class="text-muted small mb-0">Once you attend registered events and your department faculty approves your attendance, your official participation certificates will appear here.</p>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Official Visual Certificate Modal -->
+<div class="modal fade" id="visualCertModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content glass-card p-2 text-dark" style="background: rgba(15, 23, 42, 0.98); border: 2px solid #f59e0b;">
+            <div class="modal-header border-0 pb-0 justify-content-end">
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div id="print-certificate-area" class="p-4 p-md-5 rounded-3 shadow-lg position-relative" 
+                     style="background: #fff; color: #0f172a; border: 12px double #b45309; min-height: 520px; font-family: 'Times New Roman', serif;">
+                    
+                    <!-- Background Template Image if uploaded by Admin -->
+                    <div id="cert-bg-overlay" style="position: absolute; top:0; left:0; width:100%; height:100%; opacity: 0.12; background-size: cover; background-position: center; pointer-events: none; display: none;"></div>
+
+                    <div class="text-center position-relative" style="z-index: 2;">
+                        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2 border-dark">
+                            <span class="fw-bold tracking-wider text-uppercase text-secondary small">Campus Event Management System</span>
+                            <span class="badge bg-warning text-dark font-monospace">VERIFIED OFFICIAL DOCUMENT</span>
+                        </div>
+
+                        <h2 class="fw-bold text-uppercase mt-3 mb-1" style="color: #78350f; letter-spacing: 2px;">Certificate of Participation</h2>
+                        <p class="text-muted fst-italic fs-6 mb-4">This official certificate is proudly presented to</p>
+
+                        <h1 id="vcert-student-name" class="fw-bold text-dark mb-1 text-decoration-underline" style="font-size: 2.4rem; color: #1e3a8a;">STUDENT NAME</h1>
+                        <p class="text-secondary small mb-4">
+                            Roll Number: <strong id="vcert-roll" class="text-dark font-monospace">CSE-2026-001</strong> &bull; 
+                            Department: <strong id="vcert-dept" class="text-dark">Computer Science</strong>
+                        </p>
+
+                        <p class="fs-6 text-dark px-md-5 mb-4" style="line-height: 1.6;">
+                            for active participation and successful completion of the campus event
+                            <br>
+                            <span id="vcert-event-title" class="fw-bold fs-3 text-uppercase" style="color: #b45309;">EVENT TITLE</span>
+                        </p>
+
+                        <div class="row g-3 justify-content-center text-start my-4 py-2 border-top border-bottom border-secondary">
+                            <div class="col-12 col-sm-4 text-center">
+                                <small class="text-muted d-block uppercase text-xs">Date &amp; Time</small>
+                                <strong id="vcert-date-time" class="text-dark">July 28, 2026 @ 02:00 PM</strong>
+                            </div>
+                            <div class="col-12 col-sm-4 text-center">
+                                <small class="text-muted d-block uppercase text-xs">Venue Location</small>
+                                <strong id="vcert-venue" class="text-dark">Auditorium Complex</strong>
+                            </div>
+                            <div class="col-12 col-sm-4 text-center">
+                                <small class="text-muted d-block uppercase text-xs">Status Verification</small>
+                                <strong class="text-success"><i class="bi bi-patch-check-fill me-1"></i>Approved by Faculty</strong>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-end mt-5 pt-3">
+                            <div class="text-center">
+                                <div class="font-monospace text-muted small mb-1" style="border-bottom: 1px solid #333; width: 140px; margin: 0 auto;">Faculty Approval</div>
+                                <small class="text-muted">Department Authority</small>
+                            </div>
+
+                            <div class="text-center">
+                                <div class="badge bg-dark text-warning p-2 rounded-circle shadow mb-1">
+                                    <i class="bi bi-shield-lock-fill fs-3"></i>
+                                </div>
+                                <div class="small text-muted font-monospace">Official Seal</div>
+                            </div>
+
+                            <div class="text-center">
+                                <div class="font-monospace text-muted small mb-1" style="border-bottom: 1px solid #333; width: 140px; margin: 0 auto;">Event Organizer</div>
+                                <small class="text-muted">Campus Administrator</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-warning px-4 fw-bold" onclick="printCertificateArea()">
+                    <i class="bi bi-printer me-2"></i>Print / Save as PDF Certificate
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let visualCertModalInstance = null;
+
+    function openVisualCertificateModal(eventTitle, studentName, rollNumber, department, eventDate, eventTime, venueName, templateImageUrl) {
+        document.getElementById('vcert-event-title').innerText = eventTitle;
+        document.getElementById('vcert-student-name').innerText = studentName.toUpperCase();
+        document.getElementById('vcert-roll').innerText = rollNumber;
+        document.getElementById('vcert-dept').innerText = department;
+        document.getElementById('vcert-date-time').innerText = `${eventDate} @ ${eventTime}`;
+        document.getElementById('vcert-venue').innerText = venueName;
+
+        const bgOverlay = document.getElementById('cert-bg-overlay');
+        if (templateImageUrl && templateImageUrl.trim() !== '') {
+            bgOverlay.style.backgroundImage = `url('${templateImageUrl}')`;
+            bgOverlay.style.display = 'block';
+        } else {
+            bgOverlay.style.display = 'none';
+        }
+
+        if (!visualCertModalInstance) {
+            visualCertModalInstance = new bootstrap.Modal(document.getElementById('visualCertModal'));
+        }
+        visualCertModalInstance.show();
+    }
+
+    function printCertificateArea() {
+        const printContent = document.getElementById('print-certificate-area').outerHTML;
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Participation Certificate</title>
+                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+                    <style>
+                        @page { size: landscape; margin: 0; }
+                        body { padding: 20px; background: #fff; }
+                    </style>
+                </head>
+                <body onload="window.print(); window.close();">
+                    ${printContent}
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
+</script>
+{% endblock %}

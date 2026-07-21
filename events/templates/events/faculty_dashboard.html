@@ -1,0 +1,284 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}Faculty Dashboard | Campus Event Management System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="glass-card d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h3 class="fw-bold text-white mb-1"><i class="bi bi-check2-circle text-primary me-2"></i>Faculty Review Console</h3>
+                <p class="text-muted small mb-0">Department: <span class="text-info fw-bold">{{ request.user.department.name|default:"General Department" }}</span> &bull; Reviewer: <span class="text-light">{{ request.user.full_name }}</span></p>
+            </div>
+            <div>
+                <a href="{% url 'reports_page' %}" class="btn btn-glass-secondary"><i class="bi bi-bar-chart me-1"></i>View Event Analytics</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pending Approvals Section -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="glass-card border-warning">
+            <h4 class="fw-bold text-white mb-4"><i class="bi bi-clock-history text-warning me-2"></i>Pending Event Approval Requests</h4>
+
+            {% if pending_events %}
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Event Title</th>
+                                <th>Category</th>
+                                <th>Organizer</th>
+                                <th>Date &amp; Time</th>
+                                <th>Venue</th>
+                                <th>Max Cap</th>
+                                <th>Decision</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for event in pending_events %}
+                                <tr>
+                                    <td class="fw-bold text-white">{{ event.title }}</td>
+                                    <td><span class="badge bg-secondary">{{ event.category.name }}</span></td>
+                                    <td>{{ event.organizer.full_name }}</td>
+                                    <td class="small text-muted">{{ event.date }} {{ event.time }}</td>
+                                    <td class="small">{{ event.venue.venue_name|default:"TBA" }}</td>
+                                    <td>{{ event.max_participants }}</td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-glass-primary btn-sm" onclick="approveEvent({{ event.event_id }}, 'approved')">
+                                                <i class="bi bi-check-lg me-1"></i>Approve
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-sm" onclick="approveEvent({{ event.event_id }}, 'rejected')">
+                                                <i class="bi bi-x-lg me-1"></i>Reject
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted text-center py-4 mb-0">No pending event requests awaiting approval.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Attendance Approvals Section -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="glass-card border-info">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <div>
+                    <h4 class="fw-bold text-white mb-0"><i class="bi bi-award-fill text-info me-2"></i>Attendance Approvals</h4>
+                    <p class="text-light opacity-75 small mb-0">Department: <strong class="text-info">{{ request.user.department.name|default:"General Department" }}</strong> &bull; Only students in your department are listed.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <span class="badge bg-warning text-dark font-monospace py-2 px-3 fs-6" id="cnt-pending"><i class="bi bi-clock-history me-1"></i>0 Pending</span>
+                    <span class="badge bg-success text-white font-monospace py-2 px-3 fs-6" id="cnt-approved"><i class="bi bi-check-circle me-1"></i>0 Approved</span>
+                    <span class="badge bg-danger text-white font-monospace py-2 px-3 fs-6" id="cnt-rejected"><i class="bi bi-x-circle me-1"></i>0 Rejected</span>
+                </div>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="row g-3 mb-3 align-items-center bg-dark bg-opacity-50 p-3 rounded-3">
+                <div class="col-12 col-md-6 col-lg-4">
+                    <label class="form-label text-muted small mb-1">Filter by Event</label>
+                    <select id="attendance-event-filter" class="form-select form-control-glass text-white" onchange="loadFacultyAttendanceApprovals()">
+                        <option value="">All Events</option>
+                        {% for event in approved_events %}
+                            <option value="{{ event.event_id }}">{{ event.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-8 d-flex justify-content-md-end align-items-end gap-2">
+                    <div class="btn-group w-100 w-md-auto" role="group">
+                        <button type="button" class="btn btn-glass-secondary btn-sm active att-status-tab" onclick="setAttStatusFilter('', this)">All</button>
+                        <button type="button" class="btn btn-glass-secondary btn-sm att-status-tab" onclick="setAttStatusFilter('pending', this)">Pending</button>
+                        <button type="button" class="btn btn-glass-secondary btn-sm att-status-tab" onclick="setAttStatusFilter('approved', this)">Approved</button>
+                        <button type="button" class="btn btn-glass-secondary btn-sm att-status-tab" onclick="setAttStatusFilter('rejected', this)">Rejected</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="attendance-approvals-container">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-info spinner-border-sm" role="status"></div>
+                    <span class="ms-2 text-muted small">Loading department student registrations...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Approved Events Monitor -->
+<div class="row g-4">
+    <div class="col-12">
+        <div class="glass-card">
+            <h4 class="fw-bold text-white mb-4"><i class="bi bi-shield-check text-success me-2"></i>Approved Events Overview</h4>
+
+            {% if approved_events %}
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Event Title</th>
+                                <th>Category</th>
+                                <th>Organizer</th>
+                                <th>Date &amp; Time</th>
+                                <th>Venue</th>
+                                <th>Registrations</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for event in approved_events %}
+                                <tr>
+                                    <td class="fw-bold text-white">{{ event.title }}</td>
+                                    <td><span class="badge bg-secondary">{{ event.category.name }}</span></td>
+                                    <td>{{ event.organizer.full_name }}</td>
+                                    <td class="small text-muted">{{ event.date }} {{ event.time }}</td>
+                                    <td class="small">{{ event.venue.venue_name|default:"TBA" }}</td>
+                                    <td><span class="fw-bold text-info">{{ event.registrations.count }}</span> / {{ event.max_participants }}</td>
+                                    <td>
+                                        <a href="{% url 'participant_list_page' event.event_id %}" class="btn btn-glass-secondary btn-sm"><i class="bi bi-eye me-1"></i>Participants</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted text-center py-4 mb-0">No approved events currently recorded.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentAttStatusFilter = '';
+
+    async function approveEvent(eventId, status) {
+        const res = await apiCall(`/api/events/${eventId}/approve/`, 'POST', { approval_status: status });
+        if (res.success) {
+            showToast(`Event ${status} successfully!`, 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showToast(res.error || 'Failed to update approval status.', 'error');
+        }
+    }
+
+    function setAttStatusFilter(status, btn) {
+        document.querySelectorAll('.att-status-tab').forEach(b => b.classList.remove('active', 'btn-glass-primary'));
+        btn.classList.add('active', 'btn-glass-primary');
+        currentAttStatusFilter = status;
+        loadFacultyAttendanceApprovals();
+    }
+
+    async function loadFacultyAttendanceApprovals() {
+        const container = document.getElementById('attendance-approvals-container');
+        const eventId = document.getElementById('attendance-event-filter').value;
+
+        let url = `/api/faculty/attendance-approvals/?status=${currentAttStatusFilter}`;
+        if (eventId) {
+            url += `&event=${eventId}`;
+        }
+
+        const res = await apiCall(url, 'GET');
+
+        if (res.success && res.data) {
+            const metrics = res.data;
+            document.getElementById('cnt-pending').innerHTML = `<i class="bi bi-clock-history me-1"></i>${metrics.total_pending} Pending`;
+            document.getElementById('cnt-approved').innerHTML = `<i class="bi bi-check-circle me-1"></i>${metrics.total_approved} Approved`;
+            document.getElementById('cnt-rejected').innerHTML = `<i class="bi bi-x-circle me-1"></i>${metrics.total_rejected} Rejected`;
+
+            const list = metrics.registrations || [];
+
+            if (list.length > 0) {
+                let html = `
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Roll Number</th>
+                                    <th>Event Title</th>
+                                    <th>Event Date</th>
+                                    <th>Members</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                list.forEach(item => {
+                    const s = item.student_detail || {};
+                    const e = item.event_detail || {};
+                    let statusBadge = '<span class="badge bg-warning text-dark">Pending</span>';
+                    if (item.attendance_status === 'approved') {
+                        statusBadge = '<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Approved</span>';
+                    } else if (item.attendance_status === 'rejected') {
+                        statusBadge = '<span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Rejected</span>';
+                    }
+
+                    html += `
+                        <tr>
+                            <td class="fw-bold text-white">${s.full_name || s.username}</td>
+                            <td class="font-monospace text-info">${s.roll_number || 'N/A'}</td>
+                            <td class="fw-bold text-light">${e.title || 'Event'}</td>
+                            <td class="small text-muted">${e.date || 'TBA'}</td>
+                            <td><span class="badge bg-primary">${item.num_members}</span></td>
+                            <td>${statusBadge}</td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-success btn-sm ${item.attendance_status === 'approved' ? 'disabled' : ''}" onclick="processFacultyAttendance(${item.registration_id}, 'approve')">
+                                        <i class="bi bi-check-lg me-1"></i>Approve
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm ${item.attendance_status === 'rejected' ? 'disabled' : ''}" onclick="processFacultyAttendance(${item.registration_id}, 'reject')">
+                                        <i class="bi bi-x-lg me-1"></i>Reject
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<p class="text-muted text-center py-4 mb-0">No student attendance records matching the selected filters.</p>';
+            }
+        } else {
+            container.innerHTML = '<p class="text-danger text-center py-3 mb-0">Failed to load attendance records.</p>';
+        }
+    }
+
+    async function processFacultyAttendance(regId, action) {
+        const url = `/api/faculty/attendance-approvals/${regId}/${action}/`;
+        const res = await apiCall(url, 'POST');
+
+        if (res.success) {
+            showToast(`Attendance ${action}d successfully!`, 'success');
+            loadFacultyAttendanceApprovals();
+        } else {
+            showToast(res.error || res.message || `Failed to ${action} attendance.`, 'error');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadFacultyAttendanceApprovals);
+</script>
+{% endblock %}
+

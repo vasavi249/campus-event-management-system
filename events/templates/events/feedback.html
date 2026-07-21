@@ -1,0 +1,63 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}Submit Feedback | {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="glass-card">
+            <h3 class="fw-bold text-white mb-2"><i class="bi bi-star-fill text-warning me-2"></i>Submit Event Feedback</h3>
+            <p class="text-muted small mb-4">Event: <span class="text-white fw-bold">{{ event.title }}</span></p>
+
+            <form id="feedback-form" onsubmit="handleFeedbackSubmit(event)">
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Rating (1 to 5 Stars) *</label>
+                    <select id="rating" class="form-select form-control-glass fs-5 text-warning font-monospace" required>
+                        <option value="5" {% if feedback and feedback.rating == 5 %}selected{% endif %}>★★★★★ (5 - Excellent)</option>
+                        <option value="4" {% if feedback and feedback.rating == 4 %}selected{% endif %}>★★★★☆ (4 - Very Good)</option>
+                        <option value="3" {% if feedback and feedback.rating == 3 %}selected{% endif %}>★★★☆☆ (3 - Good)</option>
+                        <option value="2" {% if feedback and feedback.rating == 2 %}selected{% endif %}>★★☆☆☆ (2 - Fair)</option>
+                        <option value="1" {% if feedback and feedback.rating == 1 %}selected{% endif %}>★☆☆☆☆ (1 - Poor)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Comments &amp; Suggestions *</label>
+                    <textarea id="comments" class="form-control form-control-glass" rows="4" placeholder="Share your experience..." required>{% if feedback %}{{ feedback.comments }}{% endif %}</textarea>
+                </div>
+
+                <div class="mt-4 d-flex justify-content-between">
+                    <a href="{% url 'student_dashboard' %}" class="btn btn-glass-secondary px-4">Back</a>
+                    <button type="submit" class="btn btn-glass-primary px-4"><i class="bi bi-send me-1"></i>Submit Feedback</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function handleFeedbackSubmit(e) {
+        e.preventDefault();
+
+        const payload = {
+            event: {{ event.event_id }},
+            rating: parseInt(document.getElementById('rating').value),
+            comments: document.getElementById('comments').value.trim()
+        };
+
+        const res = await apiCall('/api/feedback/', 'POST', payload);
+
+        if (res.success) {
+            showToast('Thank you! Feedback submitted.', 'success');
+            setTimeout(() => {
+                window.location.href = '/dashboard/student/';
+            }, 1200);
+        } else {
+            showToast(res.error || 'Failed to submit feedback.', 'error');
+        }
+    }
+</script>
+{% endblock %}

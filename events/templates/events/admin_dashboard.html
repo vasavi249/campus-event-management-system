@@ -1,0 +1,632 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard | Campus Event Management System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="glass-card d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h3 class="fw-bold text-white mb-1"><i class="bi bi-speedometer2 text-danger me-2"></i>Global Administration Console</h3>
+                <p class="text-muted small mb-0">System Control, User Management, and Platform Analytics</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <button type="button" class="btn btn-glass-primary" onclick="openAdminCreateEventModal()"><i class="bi bi-plus-circle me-1"></i>Create &amp; Upload Event</button>
+                <a href="/admin/" target="_blank" class="btn btn-glass-secondary"><i class="bi bi-shield-lock me-1"></i>Django Admin Site</a>
+                <a href="/api/reports/csv/" class="btn btn-glass-secondary"><i class="bi bi-download me-1"></i>Export CSV Report</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stat Counter Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="glass-card text-center p-3">
+            <i class="bi bi-people-fill text-primary fs-1"></i>
+            <h2 class="fw-bold text-white mt-2 mb-0">{{ analytics.students }}</h2>
+            <small class="text-muted">Total Students</small>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="glass-card text-center p-3">
+            <i class="bi bi-person-workspace text-warning fs-1"></i>
+            <h2 class="fw-bold text-white mt-2 mb-0">{{ analytics.organizers }}</h2>
+            <small class="text-muted">Event Organizers</small>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="glass-card text-center p-3">
+            <i class="bi bi-calendar-event text-success fs-1"></i>
+            <h2 class="fw-bold text-white mt-2 mb-0">{{ analytics.total_events }}</h2>
+            <small class="text-muted">Platform Events</small>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="glass-card text-center p-3">
+            <i class="bi bi-ticket-detailed text-info fs-1"></i>
+            <h2 class="fw-bold text-white mt-2 mb-0">{{ analytics.total_registrations }}</h2>
+            <small class="text-muted">Total Registrations</small>
+        </div>
+    </div>
+</div>
+
+<!-- Analytics Charts Section -->
+<div class="row g-4 mb-4">
+    <div class="col-12 col-lg-6">
+        <div class="glass-card">
+            <h5 class="fw-bold text-white mb-3"><i class="bi bi-pie-chart text-info me-2"></i>Events by Category</h5>
+            <canvas id="categoryChart" height="220"></canvas>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="glass-card">
+            <h5 class="fw-bold text-white mb-3"><i class="bi bi-bar-chart-line text-success me-2"></i>Students by Department</h5>
+            <canvas id="departmentChart" height="220"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Event Poster Banners Management -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="glass-card border-primary">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div>
+                    <h5 class="fw-bold text-white mb-1"><i class="bi bi-image text-primary me-2"></i>Event Banners &amp; Catalog Management</h5>
+                    <p class="text-light opacity-75 small mb-0">Create new events, upload custom poster images, set categories, and manage all campus events directly on this page.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-glass-primary btn-sm px-3" onclick="openAdminCreateEventModal()">
+                        <i class="bi bi-plus-circle me-1"></i>+ Add New Event
+                    </button>
+                    <a href="/admin/events/event/" target="_blank" class="btn btn-glass-secondary btn-sm">
+                        <i class="bi bi-pencil-square me-1"></i>Manage in Django Admin
+                    </a>
+                </div>
+            </div>
+
+            <div id="admin-events-banner-list">
+                <div class="text-center py-3">
+                    <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                    <span class="ms-2 text-muted small">Loading event catalog...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Users List -->
+<div class="row g-4">
+    <div class="col-12">
+        <div class="glass-card">
+            <h5 class="fw-bold text-white mb-4"><i class="bi bi-person-gear text-warning me-2"></i>System User Accounts</h5>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Roll / Dept</th>
+                            <th>Joined Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in recent_users %}
+                            <tr>
+                                <td class="fw-bold text-white">{{ user.username }}</td>
+                                <td>{{ user.full_name }}</td>
+                                <td class="small text-muted">{{ user.email }}</td>
+                                <td>
+                                    <span class="badge {% if user.role == 'admin' %}badge-rejected{% elif user.role == 'faculty' %}badge-pending{% else %}badge-approved{% endif %}">
+                                        {{ user.role }}
+                                    </span>
+                                </td>
+                                <td class="small">
+                                    {% if user.roll_number %}
+                                        {{ user.roll_number }}
+                                    {% elif user.department %}
+                                        {{ user.department.code }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td class="small text-muted">{{ user.date_joined|date:"M d, Y" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Quick Edit Event & Upload Banner -->
+<div class="modal fade" id="quickBannerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content glass-card p-4 text-white" style="background: rgba(15, 23, 42, 0.96); border: 1px solid rgba(255,255,255,0.2);">
+            <div class="modal-header border-0 pb-0">
+                <h4 class="modal-title fw-bold text-white"><i class="bi bi-image text-primary me-2"></i>Update Banner &amp; Event Details</h4>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3">
+                <input type="hidden" id="upload-target-event-id">
+                
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label text-white fw-bold">Event Title *</label>
+                        <input type="text" id="modal-evt-title-input" class="form-control form-control-glass" placeholder="e.g. Tech Quiz 2026" required>
+                    </div>
+
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label text-white fw-bold">Event Date *</label>
+                        <input type="date" id="modal-evt-date-input" class="form-control form-control-glass" required>
+                    </div>
+
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label text-white fw-bold">Event Time *</label>
+                        <input type="time" id="modal-evt-time-input" class="form-control form-control-glass" required>
+                    </div>
+
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label text-white fw-bold">Fee per Member (₹)</label>
+                        <input type="number" id="modal-evt-fee-input" class="form-control form-control-glass" step="0.01" min="0" required>
+                    </div>
+
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label text-white fw-bold">Event Category *</label>
+                        <select id="modal-evt-category-select" class="form-select form-control-glass" required>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label text-white fw-bold">Approval Status *</label>
+                        <select id="modal-evt-status-select" class="form-select form-control-glass">
+                            <option value="approved" selected>Approved (Visible on Student Panel)</option>
+                            <option value="pending">Pending Review</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label text-white fw-bold"><i class="bi bi-image me-1"></i>Upload Banner Poster Image</label>
+                        <input type="file" id="modal-banner-file" class="form-control form-control-glass" accept="image/*" onchange="previewModalBanner(event)">
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label text-white fw-bold"><i class="bi bi-award me-1"></i>Upload Event Certificate Template Image</label>
+                        <input type="file" id="modal-cert-template-file" class="form-control form-control-glass" accept="image/*">
+                    </div>
+
+                    <div class="col-12 text-center mt-2">
+                        <div id="modal-banner-preview-box" style="display: none;">
+                            <small class="text-muted d-block mb-1">Banner Poster Preview:</small>
+                            <img id="modal-banner-preview-img" src="" alt="Preview" class="img-fluid rounded-3 border border-secondary" style="max-height: 160px; object-fit: cover;">
+                            <div class="mt-2">
+                                <button type="button" class="btn btn-outline-warning btn-sm" onclick="submitRemoveBanner()">
+                                    <i class="bi bi-x-circle me-1"></i>Remove Current Poster Image
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-end">
+                    <button type="button" class="btn btn-glass-secondary me-2" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-glass-primary px-4" onclick="submitQuickBannerUpload()">
+                        <i class="bi bi-save me-1"></i>Save Details &amp; Publish to Student Panel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Creating Event & Uploading Banner Image directly inside Webpage -->
+<div class="modal fade" id="adminCreateEventModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content glass-card p-4 text-white" style="background: rgba(15, 23, 42, 0.96); border: 1px solid rgba(255,255,255,0.2);">
+            <div class="modal-header border-0 pb-0">
+                <h4 class="modal-title fw-bold text-white"><i class="bi bi-calendar-plus text-primary me-2"></i>Create New Event &amp; Upload Banner</h4>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3">
+                <form id="admin-create-event-form" onsubmit="submitAdminCreateEvent(event)">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label text-white">Event Title *</label>
+                            <input type="text" id="adm-evt-title" class="form-control form-control-glass" placeholder="e.g. National AI Hackathon 2026" required>
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label text-white">Category *</label>
+                            <select id="adm-evt-category" class="form-select form-control-glass" required>
+                                <option value="">Select Category</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label text-white">Venue *</label>
+                            <select id="adm-evt-venue" class="form-select form-control-glass" required>
+                                <option value="">Select Venue</option>
+                                {% for v in venues %}
+                                    <option value="{{ v.venue_id }}">{{ v.venue_name }} (Cap: {{ v.capacity }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-sm-4">
+                            <label class="form-label text-white">Event Date *</label>
+                            <input type="date" id="adm-evt-date" class="form-control form-control-glass" required>
+                        </div>
+
+                        <div class="col-12 col-sm-4">
+                            <label class="form-label text-white">Event Time *</label>
+                            <input type="time" id="adm-evt-time" class="form-control form-control-glass" required>
+                        </div>
+
+                        <div class="col-12 col-sm-4">
+                            <label class="form-label text-white">Max Participants *</label>
+                            <input type="number" id="adm-evt-max" class="form-control form-control-glass" value="100" min="1" required>
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label text-white">Registration Deadline *</label>
+                            <input type="datetime-local" id="adm-evt-deadline" class="form-control form-control-glass" required>
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label text-white">Registration Fee per Member (₹)</label>
+                            <input type="number" id="adm-evt-fee" class="form-control form-control-glass" value="0.00" step="0.01" min="0">
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-white fw-bold"><i class="bi bi-image text-info me-1"></i>Event Banner / Poster Image</label>
+                            <input type="file" id="adm-evt-banner" class="form-control form-control-glass" accept="image/*" onchange="previewAdminCreateBanner(event)">
+                            <div id="adm-banner-preview-box" class="mt-2" style="display: none;">
+                                <img id="adm-banner-preview-img" src="" alt="Poster Preview" class="img-fluid rounded-3 border border-secondary" style="max-height: 140px; object-fit: cover;">
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-white fw-bold"><i class="bi bi-award text-warning me-1"></i>Certificate Template Background Image</label>
+                            <input type="file" id="adm-evt-cert-template" class="form-control form-control-glass" accept="image/*">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label text-white">Description *</label>
+                            <textarea id="adm-evt-desc" class="form-control form-control-glass" rows="3" placeholder="Event details, schedule, and guidelines..." required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-end">
+                        <button type="button" class="btn btn-glass-secondary px-4 me-2" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-glass-primary px-4"><i class="bi bi-check-circle me-1"></i>Publish Event</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let quickBannerModalInstance = null;
+    let adminCreateModalInstance = null;
+
+    function openAdminCreateEventModal() {
+        const form = document.getElementById('admin-create-event-form');
+        if (form) form.reset();
+        const box = document.getElementById('adm-banner-preview-box');
+        if (box) box.style.display = 'none';
+
+        if (!adminCreateModalInstance) {
+            adminCreateModalInstance = new bootstrap.Modal(document.getElementById('adminCreateEventModal'));
+        }
+        adminCreateModalInstance.show();
+    }
+
+    function previewAdminCreateBanner(event) {
+        const file = event.target.files[0];
+        const box = document.getElementById('adm-banner-preview-box');
+        const img = document.getElementById('adm-banner-preview-img');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                box.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        } else {
+            box.style.display = 'none';
+        }
+    }
+
+    async function submitAdminCreateEvent(e) {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append('title', document.getElementById('adm-evt-title').value.trim());
+        formData.append('category', document.getElementById('adm-evt-category').value);
+        formData.append('venue', document.getElementById('adm-evt-venue').value);
+        formData.append('date', document.getElementById('adm-evt-date').value);
+        formData.append('time', document.getElementById('adm-evt-time').value);
+        formData.append('max_participants', parseInt(document.getElementById('adm-evt-max').value));
+        formData.append('deadline', document.getElementById('adm-evt-deadline').value);
+        formData.append('registration_fee', parseFloat(document.getElementById('adm-evt-fee').value || 0));
+        formData.append('description', document.getElementById('adm-evt-desc').value.trim());
+        formData.append('status', 'published');
+        formData.append('approval_status', 'approved');
+
+        const bannerInput = document.getElementById('adm-evt-banner');
+        if (bannerInput && bannerInput.files.length > 0) {
+            formData.append('banner_image', bannerInput.files[0]);
+        }
+
+        const certInput = document.getElementById('adm-evt-cert-template');
+        if (certInput && certInput.files.length > 0) {
+            formData.append('certificate_template', certInput.files[0]);
+        }
+
+        const res = await apiCall('/api/events/', 'POST', formData);
+
+        if (res.success) {
+            showToast('Event created and published successfully to student panel!', 'success');
+            if (adminCreateModalInstance) adminCreateModalInstance.hide();
+            loadAdminEventsBannerList();
+        } else {
+            showToast(res.error || 'Failed to create event.', 'error');
+        }
+    }
+
+    let adminEventsCache = {};
+
+    async function loadAdminEventsBannerList() {
+        const container = document.getElementById('admin-events-banner-list');
+        const res = await apiCall('/api/events/', 'GET');
+
+        if (res.success && res.data && res.data.length > 0) {
+            adminEventsCache = {};
+            let html = `
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Banner Poster</th>
+                                <th>Event Title</th>
+                                <th>Category</th>
+                                <th>Date &amp; Fee</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            res.data.forEach(event => {
+                adminEventsCache[event.event_id] = event;
+
+                const poster = event.banner_image_url ? 
+                    `<img src="${event.banner_image_url}" alt="${event.title}" style="height: 50px; width: 80px; object-fit: cover; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2);">` :
+                    `<span class="badge bg-secondary p-2"><i class="bi bi-image me-1"></i>No Poster</span>`;
+
+                html += `
+                    <tr>
+                        <td>${poster}</td>
+                        <td class="fw-bold text-white">${event.title}</td>
+                        <td><span class="badge bg-primary bg-opacity-25 text-primary border border-primary">${event.category_detail ? event.category_detail.name : 'Category'}</span></td>
+                        <td class="small text-muted">${event.date} &bull; <strong class="text-success font-monospace">₹${parseFloat(event.registration_fee || 0).toFixed(2)}</strong></td>
+                        <td>
+                            <span class="badge ${event.approval_status === 'approved' ? 'bg-success' : 'bg-warning text-dark'}">
+                                ${event.approval_status}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button class="btn btn-outline-info btn-sm" onclick="openQuickBannerModal(${event.event_id})">
+                                    <i class="bi bi-pencil-square me-1"></i>Update Banner &amp; Details
+                                </button>
+                                <a href="/event/${event.event_id}/edit/" class="btn btn-glass-secondary btn-sm">
+                                    <i class="bi bi-gear me-1"></i>Full Edit
+                                </a>
+                                <button class="btn btn-outline-danger btn-sm" onclick="deleteEventConfirm(${event.event_id}, '${event.title.replace(/'/g, "\\'")}')">
+                                    <i class="bi bi-trash me-1"></i>Delete Event
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = '<p class="text-muted text-center py-3">No events found in database.</p>';
+        }
+    }
+
+    function openQuickBannerModal(eventId) {
+        const evt = adminEventsCache[eventId] || {};
+
+        document.getElementById('upload-target-event-id').value = eventId;
+        document.getElementById('modal-evt-title-input').value = evt.title || '';
+        document.getElementById('modal-evt-date-input').value = evt.date || '';
+        document.getElementById('modal-evt-time-input').value = evt.time || '';
+        document.getElementById('modal-evt-fee-input').value = parseFloat(evt.registration_fee || 0).toFixed(2);
+        
+        const catSelect = document.getElementById('modal-evt-category-select');
+        if (catSelect) {
+            catSelect.value = evt.category || (evt.category_detail ? evt.category_detail.id : catSelect.options[0].value);
+        }
+        
+        document.getElementById('modal-evt-status-select').value = evt.approval_status || 'approved';
+        document.getElementById('modal-banner-file').value = '';
+
+        const box = document.getElementById('modal-banner-preview-box');
+        const img = document.getElementById('modal-banner-preview-img');
+
+        if (evt.banner_image_url) {
+            img.src = evt.banner_image_url;
+            box.style.display = 'block';
+        } else {
+            box.style.display = 'none';
+        }
+
+        if (!quickBannerModalInstance) {
+            quickBannerModalInstance = new bootstrap.Modal(document.getElementById('quickBannerModal'));
+        }
+        quickBannerModalInstance.show();
+    }
+
+    function previewModalBanner(event) {
+        const file = event.target.files[0];
+        const box = document.getElementById('modal-banner-preview-box');
+        const img = document.getElementById('modal-banner-preview-img');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                box.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    async function submitQuickBannerUpload() {
+        const eventId = document.getElementById('upload-target-event-id').value;
+        const title = document.getElementById('modal-evt-title-input').value.trim();
+        const date = document.getElementById('modal-evt-date-input').value;
+        const time = document.getElementById('modal-evt-time-input').value;
+        const fee = document.getElementById('modal-evt-fee-input').value;
+        const category = document.getElementById('modal-evt-category-select').value;
+        const approvalStatus = document.getElementById('modal-evt-status-select').value;
+        const fileInput = document.getElementById('modal-banner-file');
+
+        if (!title) {
+            showToast('Event title is required.', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('title', title);
+        if (category) formData.append('category', category);
+        if (date) formData.append('date', date);
+        if (time) formData.append('time', time);
+        if (fee !== '') formData.append('registration_fee', parseFloat(fee));
+        formData.append('approval_status', approvalStatus);
+        formData.append('status', 'published');
+
+        if (fileInput.files.length > 0) {
+            formData.append('banner_image', fileInput.files[0]);
+        }
+
+        const certFileInput = document.getElementById('modal-cert-template-file');
+        if (certFileInput && certFileInput.files.length > 0) {
+            formData.append('certificate_template', certFileInput.files[0]);
+        }
+
+        const res = await apiCall(`/api/events/${eventId}/`, 'PUT', formData);
+
+        if (res.success) {
+            showToast('Event details & banner updated! Published to Student Panel.', 'success');
+            if (quickBannerModalInstance) quickBannerModalInstance.hide();
+            loadAdminEventsBannerList();
+        } else {
+            showToast(res.error || 'Failed to update event.', 'error');
+        }
+    }
+
+    async function submitRemoveBanner() {
+        const eventId = document.getElementById('upload-target-event-id').value;
+        if (!confirm('Are you sure you want to remove the banner poster for this event?')) return;
+
+        const formData = new FormData();
+        formData.append('remove_banner', 'true');
+
+        const res = await apiCall(`/api/events/${eventId}/`, 'PUT', formData);
+
+        if (res.success) {
+            showToast('Event poster image removed successfully!', 'success');
+            if (quickBannerModalInstance) quickBannerModalInstance.hide();
+            loadAdminEventsBannerList();
+        } else {
+            showToast(res.error || 'Failed to remove poster.', 'error');
+        }
+    }
+
+    async function deleteEventConfirm(eventId, title) {
+        if (!confirm(`Are you sure you want to PERMANENTLY DELETE the event "${title}"? This action cannot be undone.`)) return;
+
+        const res = await apiCall(`/api/events/${eventId}/`, 'DELETE');
+
+        if (res.success) {
+            showToast(`Event "${title}" deleted successfully!`, 'success');
+            loadAdminEventsBannerList();
+        } else {
+            showToast(res.error || 'Failed to delete event.', 'error');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadAdminEventsBannerList();
+
+        // Render Category Chart
+        const catCtx = document.getElementById('categoryChart').getContext('2d');
+        new Chart(catCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys({{ analytics.category_distribution|safe }}),
+                datasets: [{
+                    data: Object.values({{ analytics.category_distribution|safe }}),
+                    backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { labels: { color: '#f8fafc' } }
+                }
+            }
+        });
+
+        // Render Department Chart
+        const deptCtx = document.getElementById('departmentChart').getContext('2d');
+        new Chart(deptCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys({{ analytics.department_distribution|safe }}),
+                datasets: [{
+                    label: 'Students Registered',
+                    data: Object.values({{ analytics.department_distribution|safe }}),
+                    backgroundColor: '#10b981'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { ticks: { color: '#f8fafc' } },
+                    y: { ticks: { color: '#f8fafc' } }
+                },
+                plugins: {
+                    legend: { labels: { color: '#f8fafc' } }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
