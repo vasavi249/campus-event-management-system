@@ -100,9 +100,9 @@ async function fetchAPI(url, options = {}) {
         defaultHeaders['Content-Type'] = 'application/json';
     }
 
-    // Include auth token if saved in localStorage (except for registration)
+    // Include auth token if saved in localStorage (except for login and registration)
     const token = localStorage.getItem('auth_token');
-    if (token && !url.includes('/api/auth/register') && !url.includes('/users/add')) {
+    if (token && !url.includes('/api/auth/login') && !url.includes('/api/auth/register') && !url.includes('/users/add')) {
         defaultHeaders['Authorization'] = `Token ${token}`;
     }
 
@@ -118,6 +118,10 @@ async function fetchAPI(url, options = {}) {
         }
 
         if (!response.ok) {
+            if (response.status === 401 && !url.includes('/api/auth/login')) {
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('user_role');
+            }
             const errMsg = parseAPIErrorMessage(json);
             showToast(errMsg, 'error');
             return { ok: false, status: response.status, data: json, errorMessage: errMsg };

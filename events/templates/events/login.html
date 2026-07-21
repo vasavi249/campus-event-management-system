@@ -54,6 +54,9 @@
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
         
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_role');
+
         const res = await apiCall('/api/auth/login/', 'POST', { username, password });
         
         if (res.success) {
