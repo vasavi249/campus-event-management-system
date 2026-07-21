@@ -534,7 +534,7 @@ def api_events(request):
         return api_response('error', 'Only organizers and admins can create events.', http_status=status.HTTP_403_FORBIDDEN)
 
     try:
-        data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
+        data = {k: v for k, v in request.data.items()}
         data['organizer'] = request.user.id
         if getattr(request.user, 'department_id', None):
             data['department'] = request.user.department_id
@@ -592,7 +592,7 @@ def api_event_detail(request, pk):
         return api_response('error', 'Unauthorized to modify this event.', http_status=status.HTTP_403_FORBIDDEN)
 
     if request.method == 'PUT':
-        data = request.data.copy()
+        data = {k: v for k, v in request.data.items()}
         if request.data.get('remove_banner') == 'true' or request.data.get('remove_banner') is True:
             if event.banner_image:
                 event.banner_image.delete(save=False)
