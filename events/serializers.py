@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils import timezone
 from .models import Department, Category, Club, Venue, CustomUser, Event, Registration, Attendance, Feedback, Certificate, Notification
 
 class DepartmentSerializer(serializers.ModelSerializer):
@@ -71,9 +72,26 @@ class EventSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         venue = data.get('venue')
-        date = data.get('date')
-        time_val = data.get('time')
+        date = data.get('date', getattr(self.instance, 'date', None))
+        time_val = data.get('time', getattr(self.instance, 'time', None))
+        deadline = data.get('deadline', getattr(self.instance, 'deadline', None))
         approval_status = data.get('approval_status', getattr(self.instance, 'approval_status', 'pending'))
+
+        if deadline and date and time_val:
+            dt_combined = timezone.datetime.combine(date, time_val)
+            if timezone.is_aware(deadline):
+                event_datetime = timezone.make_aware(dt_combined, timezone.get_current_timezone())
+            else:
+                event_datetime = dt_combined
+
+            deadline_dt = deadline
+            if timezone.is_aware(event_datetime) and timezone.is_naive(deadline_dt):
+                deadline_dt = timezone.make_aware(deadline_dt, timezone.get_current_timezone())
+            elif timezone.is_naive(event_datetime) and timezone.is_aware(deadline_dt):
+                event_datetime = timezone.make_aware(event_datetime, timezone.get_current_timezone())
+
+            if deadline_dt > event_datetime:
+                raise serializers.ValidationError({"deadline": "Registration deadline must be before the event date and time."})
 
         if venue and approval_status == 'approved':
             qs = Event.objects.filter(venue=venue, date=date, approval_status='approved')
