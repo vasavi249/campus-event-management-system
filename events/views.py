@@ -533,42 +533,51 @@ def api_events(request):
     if not request.user.is_authenticated or request.user.role not in ['organizer', 'admin']:
         return api_response('error', 'Only organizers and admins can create events.', http_status=status.HTTP_403_FORBIDDEN)
 
-    data = request.data.copy()
-    data['organizer'] = request.user.id
-    if request.user.department:
-        data['department'] = request.user.department.id
-    if request.user.club:
-        data['club'] = request.user.club.id
+    try:
+        data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
+        data['organizer'] = request.user.id
+        if getattr(request.user, 'department_id', None):
+            data['department'] = request.user.department_id
+        if getattr(request.user, 'club_id', None):
+            data['club'] = request.user.club_id
 
-    for folder in ['event_banners', 'certificate_templates', 'certificates']:
-        os.makedirs(os.path.join(settings.MEDIA_ROOT, folder), exist_ok=True)
+        for folder in ['event_banners', 'certificate_templates', 'certificates']:
+            os.makedirs(os.path.join(settings.MEDIA_ROOT, folder), exist_ok=True)
 
-    if 'banner_image' in request.FILES:
-        data['banner_image'] = request.FILES['banner_image']
-    if 'certificate_template' in request.FILES:
-        data['certificate_template'] = request.FILES['certificate_template']
+        if 'banner_image' in request.FILES:
+            data['banner_image'] = request.FILES['banner_image']
+        if 'certificate_template' in request.FILES:
+            data['certificate_template'] = request.FILES['certificate_template']
 
-    serializer = EventSerializer(data=data, context={'request': request})
-    if serializer.is_valid():
-        try:
-            event = serializer.save()
-        except DjangoValidationError as ve:
-            err_msg = str(ve.message_dict if hasattr(ve, 'message_dict') else ve)
-            return api_response('error', err_msg, http_status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return api_response('error', f"Could not save event: {str(e)}", http_status=status.HTTP_400_BAD_REQUEST)
+        serializer = EventSerializer(data=data, context={'request': request})
+        if serializer.is_valid():
+            try:
+                event = serializer.save()
+            except DjangoValidationError as ve:
+                err_msg = str(ve.message_dict if hasattr(ve, 'message_dict') else ve)
+                return api_response('error', err_msg, http_status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return api_response('error', f"Could not save event: {str(e)}", http_status=status.HTTP_400_BAD_REQUEST)
 
-        # Notify Faculty
-        faculties = User.objects.filter(role='faculty')
-        for fac in faculties:
-            Notification.objects.create(
-                user=fac,
-                title="New Event Submitted for Approval",
-                message=f"Event '{event.title}' created by {request.user.username} requires your review."
-            )
+            # Notify Faculty safely
+            try:
+                faculties = User.objects.filter(role='faculty')
+                for fac in faculties:
+                    Notification.objects.create(
+                        user=fac,
+                        title="New Event Submitted for Approval",
+                        message=f"Event '{event.title}' created by {request.user.username} requires your review."
+                    )
+            except Exception:
+                pass
 
-        return api_response('success', 'Event created successfully and submitted for faculty approval.', serializer.data, http_status=status.HTTP_201_CREATED)
-    return api_response('error', 'Validation error while creating event.', serializer.errors, http_status=status.HTTP_400_BAD_REQUEST)
+            return api_response('success', 'Event created successfully and submitted for faculty approval.', serializer.data, http_status=status.HTTP_201_CREATED)
+        return api_response('error', 'Validation error while creating event.', serializer.errors, http_status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as general_err:
+        import traceback
+        traceback.print_exc()
+        return api_response('error', f"Server error while creating event: {str(general_err)}", http_status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
