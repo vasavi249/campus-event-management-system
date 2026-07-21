@@ -20,6 +20,9 @@ function getCookie(name) {
 window.toggleSpinner = function(show) {};
 
 function showToast(message, type = 'success') {
+    if (typeof message === 'object') {
+        message = parseAPIErrorMessage(message);
+    }
     if (type === 'danger') type = 'error';
     let container = document.getElementById('toast-container');
     if (!container) {

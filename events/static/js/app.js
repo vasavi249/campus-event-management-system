@@ -25,6 +25,9 @@ window.toggleSpinner = function(show) {};
 
 // Toast Notification Manager
 function showToast(message, type = 'success') {
+    if (typeof message === 'object') {
+        message = parseAPIErrorMessage(message);
+    }
     if (type === 'danger') type = 'error';
     let container = document.getElementById('toast-container');
     if (!container) {

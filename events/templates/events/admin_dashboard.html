@@ -368,9 +368,13 @@
             return;
         }
 
-        if (new Date(deadline) >= new Date(`${date}T${time}`)) {
-            showToast('Registration deadline must be BEFORE the event date & start time (e.g. deadline time cannot be later than event start time).', 'error');
-            return;
+        if (date && time && deadline) {
+            const dlMs = new Date(deadline).getTime();
+            const evtMs = new Date(`${date}T${time}:00`).getTime();
+            if (!isNaN(dlMs) && !isNaN(evtMs) && dlMs >= evtMs) {
+                showToast('Registration deadline must be BEFORE the event date & start time (e.g. deadline time cannot be later than event start time).', 'error');
+                return;
+            }
         }
 
         const formData = new FormData();
