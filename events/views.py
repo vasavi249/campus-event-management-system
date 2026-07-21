@@ -52,7 +52,7 @@ def custom_404_view(request, exception=None):
 
 def home_view(request):
     events = Event.objects.filter(status='published', approval_status='approved').order_by('date')
-    categories = Category.objects.filter(events__status='published', events__approval_status='approved').distinct()
+    categories = Category.objects.all()
     return render(request, 'events/home.html', {
         'categories': categories,
         'events': events,
