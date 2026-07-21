@@ -26,7 +26,7 @@
                 </div>
                 <div class="col-6 col-md-3">
                     <small class="text-muted d-block">Time</small>
-                    <span class="fw-bold text-white"><i class="bi bi-clock text-info me-1"></i>{{ event.time }}</span>
+                    <span class="fw-bold text-white"><i class="bi bi-clock text-info me-1"></i>{{ event.time|time:"h:i A" }}</span>
                 </div>
                 <div class="col-6 col-md-3">
                     <small class="text-muted d-block">Venue</small>
