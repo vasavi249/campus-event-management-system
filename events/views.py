@@ -349,6 +349,11 @@ def api_login(request):
     if not user:
         return api_response('error', 'Invalid username or password.', http_status=status.HTTP_401_UNAUTHORIZED)
 
+    if user.role == 'admin' and (not user.is_staff or not user.is_superuser):
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
+
     login(request, user)
     token, _ = Token.objects.get_or_create(user=user)
     serializer = CustomUserSerializer(user)

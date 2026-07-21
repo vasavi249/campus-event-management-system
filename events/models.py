@@ -57,6 +57,14 @@ class CustomUser(AbstractUser):
         full = f"{self.first_name} {self.last_name}".strip()
         return full if full else self.username
 
+    def save(self, *args, **kwargs):
+        if self.role == 'admin':
+            self.is_staff = True
+            self.is_superuser = True
+        elif self.role == 'faculty':
+            self.is_staff = True
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"
 
