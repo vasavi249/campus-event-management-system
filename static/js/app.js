@@ -83,6 +83,7 @@ async function fetchAPI(url, options = {}) {
         defaultHeaders['Content-Type'] = 'application/json';
     }
 
+    // Include auth token if saved in localStorage (except for registration)
     const token = localStorage.getItem('auth_token');
     if (token && !url.includes('/api/auth/register') && !url.includes('/users/add')) {
         defaultHeaders['Authorization'] = `Token ${token}`;
@@ -92,7 +93,12 @@ async function fetchAPI(url, options = {}) {
 
     try {
         const response = await fetch(url, options);
-        const json = await response.json().catch(() => ({ message: 'Server returned non-JSON response.' }));
+        let json = null;
+        try {
+            json = await response.json();
+        } catch (e) {
+            json = { message: `HTTP ${response.status}: Server response processing issue. Please verify required form fields.` };
+        }
 
         if (!response.ok) {
             const errMsg = parseAPIErrorMessage(json);

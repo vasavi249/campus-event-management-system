@@ -355,16 +355,29 @@
     async function submitAdminCreateEvent(e) {
         e.preventDefault();
 
+        const title = document.getElementById('adm-evt-title').value.trim();
+        const category = document.getElementById('adm-evt-category').value;
+        const venue = document.getElementById('adm-evt-venue').value;
+        const date = document.getElementById('adm-evt-date').value;
+        const time = document.getElementById('adm-evt-time').value;
+        const deadline = document.getElementById('adm-evt-deadline').value;
+        const description = document.getElementById('adm-evt-desc').value.trim();
+
+        if (!title || !category || !venue || !date || !time || !deadline || !description) {
+            showToast('Please select/fill out all required fields (*): Category, Venue, Date, Time, Deadline, Description.', 'error');
+            return;
+        }
+
         const formData = new FormData();
-        formData.append('title', document.getElementById('adm-evt-title').value.trim());
-        formData.append('category', document.getElementById('adm-evt-category').value);
-        formData.append('venue', document.getElementById('adm-evt-venue').value);
-        formData.append('date', document.getElementById('adm-evt-date').value);
-        formData.append('time', document.getElementById('adm-evt-time').value);
-        formData.append('max_participants', parseInt(document.getElementById('adm-evt-max').value));
-        formData.append('deadline', document.getElementById('adm-evt-deadline').value);
+        formData.append('title', title);
+        formData.append('category', category);
+        formData.append('venue', venue);
+        formData.append('date', date);
+        formData.append('time', time);
+        formData.append('max_participants', parseInt(document.getElementById('adm-evt-max').value || 100));
+        formData.append('deadline', deadline);
         formData.append('registration_fee', parseFloat(document.getElementById('adm-evt-fee').value || 0));
-        formData.append('description', document.getElementById('adm-evt-desc').value.trim());
+        formData.append('description', description);
         formData.append('status', 'published');
         formData.append('approval_status', 'approved');
 

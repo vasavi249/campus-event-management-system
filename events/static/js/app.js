@@ -82,9 +82,12 @@ function parseAPIErrorMessage(json) {
 // Standardized Fetch API Wrapper
 async function fetchAPI(url, options = {}) {
     const defaultHeaders = {
-        'Content-Type': 'application/json',
         'X-CSRFToken': getCookie('csrftoken') || ''
     };
+
+    if (!(options.body instanceof FormData)) {
+        defaultHeaders['Content-Type'] = 'application/json';
+    }
 
     // Include auth token if saved in localStorage (except for registration)
     const token = localStorage.getItem('auth_token');
@@ -96,7 +99,12 @@ async function fetchAPI(url, options = {}) {
 
     try {
         const response = await fetch(url, options);
-        const json = await response.json().catch(() => ({ message: 'Server returned non-JSON response.' }));
+        let json = null;
+        try {
+            json = await response.json();
+        } catch (e) {
+            json = { message: `HTTP ${response.status}: Server response processing issue. Please verify required form fields.` };
+        }
 
         if (!response.ok) {
             const errMsg = parseAPIErrorMessage(json);
