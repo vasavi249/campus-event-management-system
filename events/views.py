@@ -36,6 +36,22 @@ def api_response(status_str, message, data=None, http_status=status.HTTP_200_OK)
         'data': data
     }, status=http_status)
 
+from django.http import HttpResponse, JsonResponse, Http404
+
+def safe_get_object_or_404(klass, *args, **kwargs):
+    """
+    Safely retrieves an object or raises Http404, catching ValueError/TypeError 
+    if invalid IDs (e.g. empty strings, nulls, non-integers) are supplied to integer fields.
+    """
+    try:
+        for k, v in list(kwargs.items()):
+            if k in ['pk', 'id', 'event_id', 'venue_id', 'department_id', 'club_id', 'registration_id', 'certificate_id']:
+                if v is None or (isinstance(v, str) and not v.strip().isdigit()):
+                    raise Http404(f"Invalid primary key for {klass.__name__}.")
+        return get_object_or_404(klass, *args, **kwargs)
+    except (ValueError, TypeError, DjangoValidationError):
+        raise Http404(f"Object not found in {klass.__name__}.")
+
 # Custom 404 View
 def custom_404_view(request, exception=None):
     if request.path.startswith('/api/'):
@@ -45,6 +61,7 @@ def custom_404_view(request, exception=None):
             'data': None
         }, status=404)
     return render(request, 'events/404.html', status=404)
+
 
 # =========================================================================
 # FRONTEND TEMPLATE VIEWS (Page Routing)
@@ -208,7 +225,7 @@ def admin_dashboard_view(request):
     })
 
 def event_detail_view(request, id):
-    event = get_object_or_404(Event, pk=id)
+    event = safe_get_object_or_404(Event, pk=id)
     is_registered = False
     student_reg = None
     if request.user.is_authenticated and request.user.role == 'student':
@@ -245,7 +262,7 @@ def create_event_view(request):
 
 @login_required
 def edit_event_view(request, id):
-    event = get_object_or_404(Event, pk=id)
+    event = safe_get_object_or_404(Event, pk=id)
     if request.user != event.organizer and request.user.role != 'admin' and not request.user.is_superuser:
         return redirect('home')
         
@@ -259,7 +276,7 @@ def edit_event_view(request, id):
 
 @login_required
 def participant_list_view(request, id):
-    event = get_object_or_404(Event, pk=id)
+    event = safe_get_object_or_404(Event, pk=id)
     if request.user != event.organizer and request.user.role not in ['faculty', 'admin'] and not request.user.is_superuser:
         return redirect('home')
         
@@ -271,7 +288,7 @@ def participant_list_view(request, id):
 
 @login_required
 def attendance_view(request, id):
-    event = get_object_or_404(Event, pk=id)
+    event = safe_get_object_or_404(Event, pk=id)
     if request.user != event.organizer and request.user.role not in ['faculty', 'admin'] and not request.user.is_superuser:
         return redirect('home')
         
@@ -288,7 +305,7 @@ def certificates_view(request):
 
 @login_required
 def feedback_view(request, id):
-    event = get_object_or_404(Event, pk=id)
+    event = safe_get_object_or_404(Event, pk=id)
     existing_feedback = Feedback.objects.filter(student=request.user, event=event).first()
     return render(request, 'events/feedback.html', {
         'event': event,
@@ -532,7 +549,7 @@ def api_venues(request):
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def api_venue_detail(request, pk):
-    venue = get_object_or_404(Venue, pk=pk)
+    venue = safe_get_object_or_404(Venue, pk=pk)
 
     if request.method == 'GET':
         serializer = VenueSerializer(venue)
@@ -631,7 +648,7 @@ def api_events(request):
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def api_event_detail(request, pk):
-    event = get_object_or_404(Event, pk=pk)
+    event = safe_get_object_or_404(Event, pk=pk)
 
     if request.method == 'GET':
         serializer = EventSerializer(event, context={'request': request})
@@ -685,7 +702,7 @@ def api_event_approve(request, pk):
     if request.user.role not in ['faculty', 'admin'] and not request.user.is_superuser:
         return api_response('error', 'Only faculty and admin can approve events.', http_status=status.HTTP_403_FORBIDDEN)
 
-    event = get_object_or_404(Event, pk=pk)
+    event = safe_get_object_or_404(Event, pk=pk)
     approval = request.data.get('approval_status')
 
     if approval not in ['approved', 'rejected']:
@@ -720,7 +737,7 @@ def api_registrations(request):
         return api_response('success', 'Registrations retrieved.', serializer.data)
 
     event_id = request.data.get('event')
-    event = get_object_or_404(Event, pk=event_id)
+    event = safe_get_object_or_404(Event, pk=event_id)
 
     if event.approval_status != 'approved' or event.status != 'published':
         return api_response('error', 'Cannot register for unpublished or unapproved events.', http_status=status.HTTP_400_BAD_REQUEST)
@@ -757,7 +774,7 @@ def api_registrations(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def api_registration_cancel(request, pk):
-    reg = get_object_or_404(Registration, pk=pk)
+    reg = safe_get_object_or_404(Registration, pk=pk)
     if reg.student != request.user and request.user.role not in ['admin', 'organizer']:
         return api_response('error', 'Unauthorized cancellation.', http_status=status.HTTP_403_FORBIDDEN)
 
@@ -797,7 +814,7 @@ def api_attendance(request):
         return api_response('success', 'Attendance records retrieved.', serializer.data)
 
     reg_id = request.data.get('registration')
-    reg = get_object_or_404(Registration, pk=reg_id)
+    reg = safe_get_object_or_404(Registration, pk=reg_id)
 
     reg.attendance = 'present'
     reg.save()
@@ -863,7 +880,7 @@ def api_feedback(request):
     rating = request.data.get('rating')
     comments = request.data.get('comments', '')
 
-    event = get_object_or_404(Event, pk=event_id)
+    event = safe_get_object_or_404(Event, pk=event_id)
 
     fb, created = Feedback.objects.update_or_create(
         student=request.user,
@@ -885,7 +902,7 @@ def api_certificates(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def api_download_certificate(request, pk):
-    cert = get_object_or_404(Certificate, pk=pk)
+    cert = safe_get_object_or_404(Certificate, pk=pk)
     if cert.student != request.user and request.user.role not in ['admin', 'organizer']:
         return api_response('error', 'Unauthorized certificate access.', http_status=status.HTTP_403_FORBIDDEN)
 
