@@ -5,19 +5,27 @@ from pathlib import Path
 # Python 3.14 Django template context compatibility patch
 if sys.version_info >= (3, 14):
     try:
-        from django.template.context import RenderContext, BaseContext
-        def _render_context_copy(self):
-            duplicate = RenderContext()
-            duplicate.__dict__.update(self.__dict__)
-            duplicate.dicts = [d.copy() for d in self.dicts]
-            return duplicate
+        import copy as _copy_module
+        from django.template.context import BaseContext, Context, RequestContext, RenderContext
+
         def _base_context_copy(self):
-            duplicate = self.__class__()
+            duplicate = object.__new__(self.__class__)
+            duplicate.__dict__.update(self.__dict__)
+            duplicate.dicts = [d.copy() for d in self.dicts]
+            if hasattr(self, 'render_context'):
+                duplicate.render_context = _copy_module.copy(self.render_context)
+            return duplicate
+
+        def _render_context_copy(self):
+            duplicate = object.__new__(RenderContext)
             duplicate.__dict__.update(self.__dict__)
             duplicate.dicts = [d.copy() for d in self.dicts]
             return duplicate
-        RenderContext.__copy__ = _render_context_copy
+
         BaseContext.__copy__ = _base_context_copy
+        Context.__copy__ = _base_context_copy
+        RequestContext.__copy__ = _base_context_copy
+        RenderContext.__copy__ = _render_context_copy
     except Exception:
         pass
 
