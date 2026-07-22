@@ -612,8 +612,13 @@ def api_events(request):
 
         if 'banner_image' in request.FILES:
             data['banner_image'] = request.FILES['banner_image']
+        elif 'banner_image' in data and not hasattr(data['banner_image'], 'read'):
+            del data['banner_image']
+
         if 'certificate_template' in request.FILES:
             data['certificate_template'] = request.FILES['certificate_template']
+        elif 'certificate_template' in data and not hasattr(data['certificate_template'], 'read'):
+            del data['certificate_template']
 
         serializer = EventSerializer(data=data, context={'request': request})
         if serializer.is_valid():
@@ -673,8 +678,13 @@ def api_event_detail(request, pk):
 
         if 'banner_image' in request.FILES:
             data['banner_image'] = request.FILES['banner_image']
+        elif 'banner_image' in data and not hasattr(data['banner_image'], 'read'):
+            del data['banner_image']
+
         if 'certificate_template' in request.FILES:
             data['certificate_template'] = request.FILES['certificate_template']
+        elif 'certificate_template' in data and not hasattr(data['certificate_template'], 'read'):
+            del data['certificate_template']
 
         serializer = EventSerializer(event, data=data, partial=True, context={'request': request})
         if serializer.is_valid():
