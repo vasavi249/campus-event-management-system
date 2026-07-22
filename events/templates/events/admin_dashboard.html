@@ -23,31 +23,47 @@
 <!-- Stat Counter Cards -->
 <div class="row g-3 mb-4">
     <div class="col-12 col-sm-6 col-lg-3">
-        <div class="glass-card text-center p-3">
-            <i class="bi bi-people-fill text-primary fs-1"></i>
-            <h2 class="fw-bold text-white mt-2 mb-0">{{ analytics.students }}</h2>
-            <small class="text-muted">Total Students</small>
+        <div class="stat-card d-flex align-items-center gap-3">
+            <div class="stat-icon-wrapper" style="background: rgba(99, 102, 241, 0.25); color: #818cf8; border-color: rgba(99, 102, 241, 0.5);">
+                <i class="bi bi-people-fill fs-3"></i>
+            </div>
+            <div>
+                <h2 class="fw-bold text-white mb-0 fs-2">{{ analytics.students }}</h2>
+                <span class="text-secondary fw-semibold small">Total Students</span>
+            </div>
         </div>
     </div>
     <div class="col-12 col-sm-6 col-lg-3">
-        <div class="glass-card text-center p-3">
-            <i class="bi bi-person-workspace text-warning fs-1"></i>
-            <h2 class="fw-bold text-white mt-2 mb-0">{{ analytics.organizers }}</h2>
-            <small class="text-muted">Event Organizers</small>
+        <div class="stat-card d-flex align-items-center gap-3">
+            <div class="stat-icon-wrapper" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24; border-color: rgba(245, 158, 11, 0.5);">
+                <i class="bi bi-person-workspace fs-3"></i>
+            </div>
+            <div>
+                <h2 class="fw-bold text-white mb-0 fs-2">{{ analytics.organizers }}</h2>
+                <span class="text-secondary fw-semibold small">Event Organizers</span>
+            </div>
         </div>
     </div>
     <div class="col-12 col-sm-6 col-lg-3">
-        <div class="glass-card text-center p-3">
-            <i class="bi bi-calendar-event text-success fs-1"></i>
-            <h2 class="fw-bold text-white mt-2 mb-0">{{ analytics.total_events }}</h2>
-            <small class="text-muted">Platform Events</small>
+        <div class="stat-card d-flex align-items-center gap-3">
+            <div class="stat-icon-wrapper" style="background: rgba(16, 185, 129, 0.25); color: #34d399; border-color: rgba(16, 185, 129, 0.5);">
+                <i class="bi bi-calendar-event-fill fs-3"></i>
+            </div>
+            <div>
+                <h2 class="fw-bold text-white mb-0 fs-2">{{ analytics.total_events }}</h2>
+                <span class="text-secondary fw-semibold small">Platform Events</span>
+            </div>
         </div>
     </div>
     <div class="col-12 col-sm-6 col-lg-3">
-        <div class="glass-card text-center p-3">
-            <i class="bi bi-ticket-detailed text-info fs-1"></i>
-            <h2 class="fw-bold text-white mt-2 mb-0">{{ analytics.total_registrations }}</h2>
-            <small class="text-muted">Total Registrations</small>
+        <div class="stat-card d-flex align-items-center gap-3">
+            <div class="stat-icon-wrapper" style="background: rgba(6, 182, 212, 0.25); color: #38bdf8; border-color: rgba(6, 182, 212, 0.5);">
+                <i class="bi bi-ticket-detailed-fill fs-3"></i>
+            </div>
+            <div>
+                <h2 class="fw-bold text-white mb-0 fs-2">{{ analytics.total_registrations }}</h2>
+                <span class="text-secondary fw-semibold small">Total Registrations</span>
+            </div>
         </div>
     </div>
 </div>
@@ -56,14 +72,24 @@
 <div class="row g-4 mb-4">
     <div class="col-12 col-lg-6">
         <div class="glass-card">
-            <h5 class="fw-bold text-white mb-3"><i class="bi bi-pie-chart text-info me-2"></i>Events by Category</h5>
-            <canvas id="categoryChart" height="220"></canvas>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-white mb-0"><i class="bi bi-pie-chart text-info me-2"></i>Events by Category</h5>
+                <span class="badge badge-info-glass">Distribution</span>
+            </div>
+            <div style="position: relative; height: 260px; width: 100%;">
+                <canvas id="categoryChart"></canvas>
+            </div>
         </div>
     </div>
     <div class="col-12 col-lg-6">
         <div class="glass-card">
-            <h5 class="fw-bold text-white mb-3"><i class="bi bi-bar-chart-line text-success me-2"></i>Students by Department</h5>
-            <canvas id="departmentChart" height="220"></canvas>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-white mb-0"><i class="bi bi-bar-chart-line text-success me-2"></i>Students by Department</h5>
+                <span class="badge badge-success-glass">Registrations</span>
+            </div>
+            <div style="position: relative; height: 260px; width: 100%;">
+                <canvas id="departmentChart"></canvas>
+            </div>
         </div>
     </div>
 </div>
@@ -616,13 +642,27 @@
                 labels: Object.keys({{ analytics.category_distribution|safe }}),
                 datasets: [{
                     data: Object.values({{ analytics.category_distribution|safe }}),
-                    backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6']
+                    backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#06b6d4'],
+                    borderColor: '#0f172a',
+                    borderWidth: 3,
+                    hoverOffset: 6
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
+                cutout: '72%',
                 plugins: {
-                    legend: { labels: { color: '#f8fafc' } }
+                    legend: { 
+                        position: 'bottom',
+                        labels: { 
+                            color: '#cbd5e1', 
+                            font: { family: 'Plus Jakarta Sans', size: 12, weight: '600' },
+                            padding: 15,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        } 
+                    }
                 }
             }
         });
@@ -636,17 +676,27 @@
                 datasets: [{
                     label: 'Students Registered',
                     data: Object.values({{ analytics.department_distribution|safe }}),
-                    backgroundColor: '#10b981'
+                    backgroundColor: ['#10b981', '#6366f1', '#06b6d4', '#f59e0b', '#a855f7'],
+                    borderRadius: 8,
+                    borderSkipped: false
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 scales: {
-                    x: { ticks: { color: '#f8fafc' } },
-                    y: { ticks: { color: '#f8fafc' } }
+                    x: { 
+                        ticks: { color: '#cbd5e1', font: { family: 'Plus Jakarta Sans', weight: '600' } },
+                        grid: { display: false }
+                    },
+                    y: { 
+                        ticks: { color: '#cbd5e1', font: { family: 'Plus Jakarta Sans', weight: '600' } },
+                        grid: { color: 'rgba(255, 255, 255, 0.08)' },
+                        beginAtZero: true
+                    }
                 },
                 plugins: {
-                    legend: { labels: { color: '#f8fafc' } }
+                    legend: { display: false }
                 }
             }
         });
