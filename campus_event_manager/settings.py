@@ -121,6 +121,17 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+try:
+    import whitenoise
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+    if 'whitenoise.middleware.WhiteNoiseMiddleware' not in MIDDLEWARE:
+        _sec_idx = MIDDLEWARE.index('django.middleware.security.SecurityMiddleware')
+        MIDDLEWARE.insert(_sec_idx + 1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+except ImportError:
+    pass
+
+
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
