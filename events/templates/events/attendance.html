@@ -8,7 +8,7 @@
     <div class="col-12">
         <div class="glass-card">
             <h3 class="fw-bold text-white mb-1"><i class="bi bi-qr-code-scan text-warning me-2"></i>Live Gate Check-in Terminal</h3>
-            <p class="text-muted small mb-0">Event: <strong class="text-white">{{ event.title }}</strong> &bull; Venue: <span class="text-info">{{ event.venue.venue_name }}</span></p>
+            <p class="text-secondary small mb-0">Event: <strong class="text-white">{{ event.title }}</strong> &bull; Venue: <span class="text-info">{{ event.venue.venue_name }}</span></p>
         </div>
     </div>
 </div>
@@ -19,16 +19,22 @@
         <div class="glass-card text-center p-4">
             <h4 class="fw-bold text-white mb-3">Scan / Type Ticket Code</h4>
             
+            <!-- Pure CSS Animated QR Scan Line Frame -->
+            <div class="qr-scanner-frame mb-4 d-flex align-items-center justify-content-center">
+                <div class="qr-scanner-line"></div>
+                <i class="bi bi-qr-code text-white opacity-50" style="font-size: 8rem;"></i>
+            </div>
+
             <form onsubmit="handleCheckinSubmit(event)">
                 <div class="mb-3">
                     <input type="text" id="ticket_code_input" class="form-control form-control-glass text-center font-monospace fs-4 text-warning text-uppercase" placeholder="EVT-XXXXXX" required autofocus>
                 </div>
-                <button type="submit" class="btn btn-glass-primary btn-lg w-100 py-2"><i class="bi bi-check2-circle me-2"></i>Verify Ticket &amp; Mark Attendance</button>
+                <button type="submit" class="btn btn-glass-primary btn-lg w-100 py-3 fs-6"><i class="bi bi-check2-circle me-2"></i>Verify Ticket &amp; Mark Attendance</button>
             </form>
 
-            <div class="mt-4 p-3 glass-card bg-opacity-25 text-start">
-                <small class="text-muted d-block mb-1"><i class="bi bi-info-circle text-info me-1"></i>Automated Workflow Notice:</small>
-                <small class="text-light opacity-75">Scanning or entering a valid confirmed ticket code instantly marks attendance and automatically generates the student's downloadable participation certificate.</small>
+            <div class="mt-4 p-3 glass-card bg-dark bg-opacity-50 text-start">
+                <small class="text-secondary d-block mb-1"><i class="bi bi-info-circle text-info me-1"></i>Automated Workflow Notice:</small>
+                <small class="text-secondary">Scanning or entering a valid confirmed ticket code instantly marks attendance and automatically generates the student's downloadable participation certificate.</small>
             </div>
         </div>
     </div>
@@ -99,13 +105,22 @@
         }
     }
 
+    async function handleCheckinSubmit(e) {
+        e.preventDefault();
+        const code = document.getElementById('ticket_code_input').value.trim();
+        if (!code) return;
+        await quickMarkAttendance(code);
+    }
+
     async function quickMarkAttendance(code) {
-        const res = await apiCall('/api/attendance/checkin/', 'POST', { ticket_code: code });
+        const eventId = {{ event.event_id }};
+        const res = await apiCall(`/api/events/${eventId}/attendance/checkin/`, 'POST', { ticket_code: code });
+
         if (res.success) {
-            showToast(res.message || 'Attendance marked successfully!', 'success');
-            setTimeout(() => window.location.reload(), 1000);
+            showToast(res.message || `Attendance verified for ticket ${code}!`, 'success');
+            setTimeout(() => { window.location.reload(); }, 1200);
         } else {
-            showToast(res.error || 'Failed to mark attendance.', 'error');
+            showToast(res.error || res.message || 'Check-in failed.', 'error');
         }
     }
 </script>

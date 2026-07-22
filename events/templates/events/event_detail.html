@@ -4,93 +4,116 @@
 {% block title %}{{ event.title }} | Campus Event Management System{% endblock %}
 
 {% block content %}
+<!-- Breadcrumb Trail -->
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-glass mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><span class="badge badge-indigo-glass me-1">{{ event.category.name }}</span> {{ event.title }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
 <div class="row g-4">
+    <!-- Main Event Details Column -->
     <div class="col-12 col-lg-8">
         <div class="glass-card">
-            {% if event.banner_image %}
-                <div class="position-relative overflow-hidden rounded-3 mb-4" style="max-height: 380px;">
-                    <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" class="w-100 h-100 rounded-3 border border-secondary" style="object-fit: cover; max-height: 380px;">
-                </div>
-            {% endif %}
+            <!-- Event Banner Image Container -->
+            <div class="event-card-img-wrapper mb-4" style="height: 340px; aspect-ratio: auto;">
+                {% if event.banner_image %}
+                    <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" onerror="this.onerror=null; this.src='{% static 'images/techquiz.png' %}';">
+                {% elif event.category.name|lower == 'technical' or 'hackathon' in event.title|lower %}
+                    <img src="{% static 'images/hackathon.png' %}" alt="{{ event.title }}" onerror="this.onerror=null; this.src='{% static 'images/techquiz.png' %}';">
+                {% elif event.category.name|lower == 'cultural' or 'cultural' in event.title|lower %}
+                    <img src="{% static 'images/cultural.png' %}" alt="{{ event.title }}" onerror="this.onerror=null; this.src='{% static 'images/techquiz.png' %}';">
+                {% else %}
+                    <img src="{% static 'images/techquiz.png' %}" alt="{{ event.title }}">
+                {% endif %}
+            </div>
 
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="badge bg-primary bg-opacity-25 text-primary border border-primary px-3 py-1 fs-6">
-                    {{ event.category.name }}
+                <span class="badge badge-indigo-glass fs-6">
+                    <i class="bi bi-tag-fill me-1"></i>{{ event.category.name }}
                 </span>
                 <span class="badge {% if event.approval_status == 'approved' %}badge-approved{% else %}badge-pending{% endif %}">
                     {{ event.approval_status|title }}
                 </span>
             </div>
 
-            <h2 class="fw-bold text-white mb-3">{{ event.title }}</h2>
-            <p class="text-light leading-relaxed mb-4">{{ event.description }}</p>
+            <h1 class="fw-bold text-white mb-3 fs-2">{{ event.title }}</h1>
+            <p class="text-secondary leading-relaxed mb-4 fs-5">{{ event.description }}</p>
 
-            <div class="row g-3 p-3 glass-card bg-opacity-25 mb-4">
+            <!-- Detailed Event Info Grid -->
+            <h5 class="fw-bold text-white mb-3"><i class="bi bi-info-circle text-primary me-2"></i>Event Logistics &amp; Schedule</h5>
+            <div class="row g-3 p-3 glass-card bg-dark bg-opacity-50 mb-4">
                 <div class="col-6 col-md-3">
-                    <small class="text-muted d-block">Date</small>
+                    <small class="text-secondary d-block mb-1">Date</small>
                     <span class="fw-bold text-white"><i class="bi bi-calendar-event text-primary me-1"></i>{{ event.date }}</span>
                 </div>
                 <div class="col-6 col-md-3">
-                    <small class="text-muted d-block">Time</small>
+                    <small class="text-secondary d-block mb-1">Time</small>
                     <span class="fw-bold text-white"><i class="bi bi-clock text-info me-1"></i>{{ event.time|time:"h:i A" }}</span>
                 </div>
                 <div class="col-6 col-md-3">
-                    <small class="text-muted d-block">Venue</small>
+                    <small class="text-secondary d-block mb-1">Venue</small>
                     <span class="fw-bold text-white"><i class="bi bi-geo-alt text-warning me-1"></i>{{ event.venue.venue_name|default:"TBA" }}</span>
                 </div>
                 <div class="col-6 col-md-3">
-                    <small class="text-muted d-block">Max Capacity</small>
-                    <span class="fw-bold text-white"><i class="bi bi-people text-success me-1"></i>{{ event.max_participants }}</span>
+                    <small class="text-secondary d-block mb-1">Max Capacity</small>
+                    <span class="fw-bold text-white"><i class="bi bi-people text-success me-1"></i>{{ event.max_participants }} Members</span>
                 </div>
             </div>
 
-            <h5 class="fw-bold text-white mb-3"><i class="bi bi-chat-left-stars text-warning me-2"></i>Participant Feedback &amp; Reviews ({{ avg_rating }}★)</h5>
+            <!-- Participant Feedback & Reviews -->
+            <h5 class="fw-bold text-white mb-3"><i class="bi bi-chat-left-stars text-warning me-2"></i>Participant Reviews ({{ avg_rating }}★)</h5>
             {% if feedbacks %}
                 <div class="space-y-3">
                     {% for fb in feedbacks %}
-                        <div class="p-3 glass-card bg-opacity-25 rounded-3 mb-2">
+                        <div class="p-3 glass-card bg-dark bg-opacity-50 rounded-3 mb-2">
                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="fw-bold text-info">{{ fb.student.full_name }}</span>
-                                <span class="text-warning font-monospace">{{ fb.rating }}★</span>
+                                <span class="fw-bold text-info"><i class="bi bi-person-circle me-1"></i>{{ fb.student.full_name }}</span>
+                                <span class="badge badge-warning-glass">{{ fb.rating }}★</span>
                             </div>
-                            <p class="text-muted small mb-0">{{ fb.comments }}</p>
+                            <p class="text-secondary small mb-0">{{ fb.comments }}</p>
                         </div>
                     {% endfor %}
                 </div>
             {% else %}
-                <p class="text-muted small">No feedback reviews submitted yet.</p>
+                <p class="text-secondary small mb-0">No feedback reviews submitted yet for this event.</p>
             {% endif %}
         </div>
     </div>
 
-    <!-- Registration Panel Column -->
+    <!-- Sticky Registration Sidebar Column -->
     <div class="col-12 col-lg-4">
-        <div class="glass-card text-center">
-            <h4 class="fw-bold text-white mb-3">Event Pass Gate</h4>
-            <p class="text-muted small mb-4">Registration deadline: <br><strong class="text-danger">{{ event.deadline|date:"M d, Y H:i" }}</strong></p>
+        <div class="glass-card text-center sticky-top" style="top: 90px;">
+            <h4 class="fw-bold text-white mb-2"><i class="bi bi-ticket-perforated text-primary me-2"></i>Event Registration Gate</h4>
+            <p class="text-secondary small mb-3">Deadline: <strong class="text-rose" style="color:#f43f5e;">{{ event.deadline|date:"M d, Y H:i" }}</strong></p>
 
             {% if request.user.is_authenticated and request.user.role == 'student' %}
                 {% if is_registered %}
-                    <div class="alert alert-success bg-success bg-opacity-25 border-success text-white">
+                    <div class="alert alert-success bg-success bg-opacity-25 border-success text-white mb-3">
                         <i class="bi bi-check-circle-fill me-2"></i>You are registered for this event!
                     </div>
-                    <button class="btn btn-warning w-100 mb-2" onclick="showDigitalPass('{{ student_reg.ticket_code }}', '{{ event.title|escapejs }}', '{{ request.user.full_name|escapejs }}', '{{ event.venue.venue_name|escapejs }}', '{{ event.date }}')">
+                    <button class="btn btn-warning w-100 mb-2 py-2 fw-bold" onclick="showDigitalPass('{{ student_reg.ticket_code }}', '{{ event.title|escapejs }}', '{{ request.user.full_name|escapejs }}', '{{ event.venue.venue_name|escapejs }}', '{{ event.date }}')">
                         <i class="bi bi-qr-code me-2"></i>View Digital Pass
                     </button>
-                    <button class="btn btn-outline-danger btn-sm w-100" onclick="cancelRegistration({{ student_reg.registration_id }})">
+                    <button class="btn btn-outline-danger btn-sm w-100 mt-1" onclick="cancelRegistration({{ student_reg.registration_id }})">
                         Cancel Registration
                     </button>
                 {% else %}
-                    <div class="p-3 glass-card bg-dark bg-opacity-50 mb-3 text-start">
-                        <small class="text-muted d-block mb-1">Registration Fee</small>
-                        <h3 class="fw-bold text-success mb-0">₹{{ event.registration_fee }} <small class="fs-6 text-muted font-normal">/ member</small></h3>
+                    <div class="p-3 glass-card bg-dark bg-opacity-75 mb-3 text-start">
+                        <small class="text-secondary d-block mb-1">Registration Fee</small>
+                        <h3 class="fw-bold text-success mb-0">₹{{ event.registration_fee }} <small class="fs-6 text-secondary fw-normal">/ member</small></h3>
                     </div>
-                    <button class="btn btn-glass-primary btn-lg w-100" onclick="startPaidRegistration({{ event.event_id }}, {{ event.registration_fee }}, {{ event.max_participants }})">
-                        <i class="bi bi-ticket-perforated me-2"></i>Register Now
+                    <button class="btn btn-glass-primary btn-lg w-100 py-3 fs-6" onclick="startPaidRegistration({{ event.event_id }}, {{ event.registration_fee }}, {{ event.max_participants }})">
+                        <i class="bi bi-ticket-perforated me-2"></i>Register Now <i class="bi bi-arrow-right ms-1"></i>
                     </button>
                 {% endif %}
             {% elif not request.user.is_authenticated %}
-                <a href="{% url 'login_page' %}" class="btn btn-glass-primary btn-lg w-100">
+                <a href="{% url 'login_page' %}" class="btn btn-glass-primary btn-lg w-100 py-3 fs-6">
                     Sign In to Register
                 </a>
             {% else %}
@@ -105,7 +128,7 @@
 <!-- Multi-Step Paid Event Registration Modal -->
 <div class="modal fade" id="paidRegistrationModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content glass-card p-4 text-white position-relative" style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.2);">
+        <div class="modal-content glass-card p-4 text-white position-relative" style="background: rgba(15, 23, 42, 0.96); border: 1px solid rgba(255,255,255,0.2);">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-bold text-white" id="regModalTitle"><i class="bi bi-ticket-perforated text-primary me-2"></i>Event Registration</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -113,13 +136,13 @@
             <div class="modal-body py-3">
                 <!-- STEP 1: Team Size Input -->
                 <div id="regStep1">
-                    <p class="text-light opacity-75 small mb-3">Select the number of members registering for this event.</p>
+                    <p class="text-secondary small mb-3">Select the number of members registering for this event.</p>
                     <div class="mb-3">
                         <label class="form-label text-white">How many members are registering? *</label>
                         <input type="number" id="regNumMembers" class="form-control form-control-glass text-white fs-5 text-center fw-bold" value="1" min="1" oninput="calculateTotalFee()">
                     </div>
                     <div class="p-3 glass-card bg-dark bg-opacity-50 mb-3 text-center">
-                        <div class="small text-muted mb-1">Fee Breakdown</div>
+                        <div class="small text-secondary mb-1">Fee Breakdown</div>
                         <div class="d-flex justify-content-between align-items-center">
                             <span>Unit Fee: <strong id="regUnitFee">₹0.00</strong></span>
                             <span class="fs-4 fw-bold text-success" id="regTotalAmount">₹0.00</span>
@@ -133,15 +156,15 @@
                 <!-- STEP 2: QR Payment Screen -->
                 <div id="regStep2" style="display: none;">
                     <div class="text-center mb-3">
-                        <span class="badge bg-warning text-dark px-3 py-1 mb-2">Simulated Payment Gateway</span>
+                        <span class="badge badge-warning-glass px-3 py-1 mb-2">Simulated Payment Gateway</span>
                         <h5 class="fw-bold text-white mb-1" id="payEventTitle">{{ event.title }}</h5>
-                        <p class="text-muted small">Scan QR Code or confirm payment below</p>
+                        <p class="text-secondary small">Scan QR Code or confirm payment below</p>
                     </div>
 
                     <div class="text-center p-3 glass-card bg-dark bg-opacity-75 mb-3">
                         <img id="payQrImage" src="" alt="Payment QR Code" class="img-fluid rounded-3 mb-2 border border-secondary p-2 bg-white" style="max-width: 220px;">
                         <h3 class="fw-bold text-success mb-1" id="payTotalDisplay">₹0.00</h3>
-                        <p class="text-light opacity-75 small mb-0"><span id="payMembersCount">1</span> Member(s) &bull; Ref: SIM-UPI-DEMO</p>
+                        <p class="text-secondary small mb-0"><span id="payMembersCount">1</span> Member(s) &bull; Ref: SIM-UPI-DEMO</p>
                     </div>
 
                     <button type="button" class="btn btn-success w-100 py-2 fs-5 fw-bold" onclick="submitConfirmPayment()">
@@ -154,14 +177,14 @@
                     <div class="text-center py-2">
                         <i class="bi bi-check-circle-fill text-success" style="font-size: 3.5rem;"></i>
                         <h4 class="fw-bold text-white mt-2">Registration Successful!</h4>
-                        <p class="text-light opacity-75 small mb-3">Your digital pass is ready and attendance request is submitted to your department faculty.</p>
+                        <p class="text-secondary small mb-3">Your digital pass is ready and attendance request is submitted to your department faculty.</p>
 
                         <div class="glass-card bg-dark bg-opacity-75 p-3 text-start mb-3 space-y-2">
-                            <div><small class="text-muted">Event:</small> <strong class="text-white" id="succEventTitle">--</strong></div>
-                            <div><small class="text-muted">Ticket Pass Code:</small> <strong class="text-warning font-monospace" id="succTicketCode">--</strong></div>
-                            <div><small class="text-muted">Registered Members:</small> <strong class="text-white" id="succMembers">--</strong></div>
-                            <div><small class="text-muted">Amount Paid:</small> <strong class="text-success" id="succAmount">--</strong></div>
-                            <div><small class="text-muted">Transaction ID:</small> <strong class="text-info font-monospace" id="succTxnId">--</strong></div>
+                            <div><small class="text-secondary">Event:</small> <strong class="text-white" id="succEventTitle">--</strong></div>
+                            <div><small class="text-secondary">Ticket Pass Code:</small> <strong class="text-warning font-monospace" id="succTicketCode">--</strong></div>
+                            <div><small class="text-secondary">Registered Members:</small> <strong class="text-white" id="succMembers">--</strong></div>
+                            <div><small class="text-secondary">Amount Paid:</small> <strong class="text-success" id="succAmount">--</strong></div>
+                            <div><small class="text-secondary">Transaction ID:</small> <strong class="text-info font-monospace" id="succTxnId">--</strong></div>
                         </div>
 
                         <a href="/dashboard/student/" class="btn btn-glass-primary w-100 py-2">
@@ -246,4 +269,3 @@
     }
 </script>
 {% endblock %}
-
