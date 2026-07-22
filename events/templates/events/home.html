@@ -10,10 +10,10 @@
         <span class="badge bg-primary bg-opacity-25 text-primary border border-primary px-3 py-2 rounded-pill mb-3">
             <i class="bi bi-stars me-1"></i> Centralized Campus Platform
         </span>
-        <h1 class="display-4 fw-extrabold text-white mb-3">
-            Plan &bull; Register &bull; Participate &bull; <span class="text-transparent bg-clip-text bg-gradient-to-r text-primary">Celebrate.</span>
+        <h1 class="display-4 fw-extrabold hero-gradient-text mb-3">
+            Plan &bull; Register &bull; Participate &bull; Celebrate.
         </h1>
-        <p class="lead text-muted mb-4">
+        <p class="hero-subtitle mb-4">
             Discover upcoming hackathons, cultural festivals, workshops, and sports competitions. Manage your digital QR event passes and download verified certificates seamlessly.
         </p>
         
@@ -34,29 +34,37 @@
             <div class="row g-3">
                 <div class="col-6">
                     <div class="stat-card">
-                        <i class="bi bi-calendar-check text-primary fs-1"></i>
-                        <h2 class="fw-bold text-white mt-2 mb-0">{{ total_events }}</h2>
+                        <div class="stat-icon-wrapper mx-auto mb-2">
+                            <i class="bi bi-calendar-check"></i>
+                        </div>
+                        <h2 class="fw-bold text-white mt-1 mb-0">{{ total_events }}</h2>
                         <small class="text-muted">Active Campus Events</small>
                     </div>
                 </div>
                 <div class="col-6">
                     <div class="stat-card">
-                        <i class="bi bi-people text-emerald fs-1" style="color: #10b981;"></i>
-                        <h2 class="fw-bold text-white mt-2 mb-0">{{ total_students }}</h2>
+                        <div class="stat-icon-wrapper mx-auto mb-2" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: rgba(16, 185, 129, 0.3);">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <h2 class="fw-bold text-white mt-1 mb-0">{{ total_students }}</h2>
                         <small class="text-muted">Registered Students</small>
                     </div>
                 </div>
                 <div class="col-6">
                     <div class="stat-card">
-                        <i class="bi bi-qr-code text-warning fs-1"></i>
-                        <h2 class="fw-bold text-white mt-2 mb-0">100%</h2>
+                        <div class="stat-icon-wrapper mx-auto mb-2" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border-color: rgba(245, 158, 11, 0.3);">
+                            <i class="bi bi-qr-code"></i>
+                        </div>
+                        <h2 class="fw-bold text-white mt-1 mb-0">100%</h2>
                         <small class="text-muted">Digital Pass Verification</small>
                     </div>
                 </div>
                 <div class="col-6">
                     <div class="stat-card">
-                        <i class="bi bi-award text-info fs-1"></i>
-                        <h2 class="fw-bold text-white mt-2 mb-0">Auto</h2>
+                        <div class="stat-icon-wrapper mx-auto mb-2" style="background: rgba(6, 182, 212, 0.15); color: #06b6d4; border-color: rgba(6, 182, 212, 0.3);">
+                            <i class="bi bi-award"></i>
+                        </div>
+                        <h2 class="fw-bold text-white mt-1 mb-0">Auto</h2>
                         <small class="text-muted">Certificate Generation</small>
                     </div>
                 </div>
@@ -68,7 +76,7 @@
 <!-- Search & Categories Section -->
 <div id="events-section" class="row mb-4">
     <div class="col-12">
-        <div class="glass-card mb-4">
+        <div class="glass-card mb-4 p-3">
             <div class="row g-3 align-items-center">
                 <div class="col-md-6">
                     <div class="input-group">
@@ -107,15 +115,15 @@
                     {% for event in cat.events.all %}
                         {% if event.approval_status == 'approved' and event.status == 'published' %}
                             <div class="col-12 col-md-6 col-lg-4 event-card-item" data-category="{{ cat.id }}" data-category-name="{{ cat.name|lower }}" data-title="{{ event.title|lower }}">
-                                <div class="glass-card h-100 d-flex flex-column justify-content-between p-3 position-relative overflow-hidden" style="transition: transform 0.25s ease, box-shadow 0.25s ease;">
+                                <div class="glass-card h-100 d-flex flex-column justify-content-between p-3 position-relative overflow-hidden">
                                     <div>
                                         <!-- Event Banner / Poster Image -->
                                         {% if event.banner_image %}
-                                            <div class="position-relative overflow-hidden rounded-3 mb-3" style="height: 180px;">
-                                                <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" class="w-100 h-100" style="object-fit: cover;">
+                                            <div class="event-card-img-wrapper mb-3">
+                                                <img src="{{ event.banner_image.url }}" alt="{{ event.title }}">
                                             </div>
                                         {% else %}
-                                            <div class="rounded-3 mb-3 d-flex flex-column align-items-center justify-content-center text-center p-3 position-relative overflow-hidden" style="height: 180px; background: linear-gradient(135deg, rgba(79, 70, 229, 0.45), rgba(147, 51, 234, 0.45)), #0f172a; border: 1px solid rgba(255,255,255,0.15);">
+                                            <div class="event-card-img-wrapper mb-3 d-flex flex-column align-items-center justify-content-center text-center p-3 position-relative overflow-hidden" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.45), rgba(168, 85, 247, 0.45)), #0f172a; border: 1px solid rgba(255,255,255,0.15);">
                                                 <i class="bi bi-ticket-perforated text-primary mb-2 opacity-75" style="font-size: 2.8rem;"></i>
                                                 <span class="fw-bold text-white fs-6 text-truncate px-2">{{ event.title }}</span>
                                                 <small class="text-info opacity-75 font-monospace mt-1">{{ cat.name }}</small>
@@ -123,10 +131,10 @@
                                         {% endif %}
 
                                         <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <span class="badge bg-primary bg-opacity-25 text-primary border border-primary px-3 py-1">
+                                            <span class="badge badge-info-glass">
                                                 {{ cat.name }}
                                             </span>
-                                            <span class="badge bg-success bg-opacity-25 text-success border border-success px-2 py-1 font-monospace fw-bold">
+                                            <span class="badge badge-success-glass font-monospace fw-bold">
                                                 {% if event.registration_fee > 0 %}₹{{ event.registration_fee }}{% else %}Free{% endif %}
                                             </span>
                                         </div>

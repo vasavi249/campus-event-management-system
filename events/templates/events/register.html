@@ -12,24 +12,28 @@
                 <h3 class="fw-bold text-white mt-2 mb-1">Create Account</h3>
                 <p class="text-light opacity-75 small">Register to discover, schedule, or approve campus events</p>
             </div>
-            
+
             <form id="register-form" onsubmit="handleRegisterSubmit(event)">
                 <div class="row g-3">
                     <div class="col-12 col-sm-6">
                         <label class="form-label">First Name *</label>
-                        <input type="text" id="first_name" class="form-control form-control-glass" placeholder="e.g. John" required>
+                        <input type="text" id="first_name" class="form-control form-control-glass"
+                            placeholder="e.g. John" required>
                     </div>
                     <div class="col-12 col-sm-6">
                         <label class="form-label">Last Name *</label>
-                        <input type="text" id="last_name" class="form-control form-control-glass" placeholder="e.g. Doe" required>
+                        <input type="text" id="last_name" class="form-control form-control-glass" placeholder="e.g. Doe"
+                            required>
                     </div>
                     <div class="col-12 col-sm-6">
                         <label class="form-label">Username *</label>
-                        <input type="text" id="username" class="form-control form-control-glass" placeholder="Choose unique username" required autocomplete="username">
+                        <input type="text" id="username" class="form-control form-control-glass"
+                            placeholder="Choose unique username" required autocomplete="username">
                     </div>
                     <div class="col-12 col-sm-6">
                         <label class="form-label">Email Address *</label>
-                        <input type="email" id="email" class="form-control form-control-glass" placeholder="student@campus.edu" required>
+                        <input type="email" id="email" class="form-control form-control-glass"
+                            placeholder="student@campus.edu" required>
                     </div>
                     <div class="col-12 col-sm-6">
                         <label class="form-label">Phone Number</label>
@@ -48,16 +52,17 @@
                     <!-- Student Fields -->
                     <div class="col-12 col-sm-6 role-field student-field">
                         <label class="form-label">Roll Number / Student ID *</label>
-                        <input type="text" id="roll_number" class="form-control form-control-glass" placeholder="e.g. CSE-2026-045">
+                        <input type="text" id="roll_number" class="form-control form-control-glass"
+                            placeholder="e.g. CSE-2026-045">
                     </div>
-                    
+
                     <!-- Department selection -->
                     <div class="col-12 col-sm-6 role-field student-field faculty-field">
                         <label class="form-label">Department *</label>
                         <select id="department" class="form-select form-control-glass">
                             <option value="">Select Department</option>
                             {% for dept in departments %}
-                                <option value="{{ dept.id }}">{{ dept.name }} ({{ dept.code }})</option>
+                            <option value="{{ dept.id }}">{{ dept.name }} ({{ dept.code }})</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -68,29 +73,33 @@
                         <select id="club" class="form-select form-control-glass">
                             <option value="">Select Club</option>
                             {% for club in clubs %}
-                                <option value="{{ club.id }}">{{ club.name }}</option>
+                            <option value="{{ club.id }}">{{ club.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
 
                     <div class="col-12 col-sm-6">
                         <label class="form-label">Password *</label>
-                        <input type="password" id="password" class="form-control form-control-glass" placeholder="Enter password" required autocomplete="new-password">
+                        <input type="password" id="password" class="form-control form-control-glass"
+                            placeholder="Enter password" required autocomplete="new-password">
                     </div>
-                    
+
                     <div class="col-12 col-sm-6">
                         <label class="form-label">Confirm Password *</label>
-                        <input type="password" id="confirm_password" class="form-control form-control-glass" placeholder="Confirm password" required autocomplete="new-password">
+                        <input type="password" id="confirm_password" class="form-control form-control-glass"
+                            placeholder="Confirm password" required autocomplete="new-password">
                     </div>
                 </div>
 
                 <div class="mt-4">
-                    <button type="submit" class="btn btn-glass-primary w-100 py-2 fs-5"><i class="bi bi-person-plus me-2"></i>Sign Up</button>
+                    <button type="submit" class="btn btn-glass-primary w-100 py-2 fs-5"><i
+                            class="bi bi-person-plus me-2"></i>Sign Up</button>
                 </div>
             </form>
 
             <div class="text-center mt-4">
-                <p class="mb-0 text-light opacity-75 small">Already have an account? <a href="{% url 'login_page' %}" class="fw-bold text-primary text-decoration-none">Sign In</a></p>
+                <p class="mb-0 text-light opacity-75 small">Already have an account? <a href="{% url 'login_page' %}"
+                        class="fw-bold text-primary text-decoration-none">Sign In</a></p>
             </div>
         </div>
     </div>
@@ -103,7 +112,7 @@
         const role = document.getElementById('role').value;
         const allFields = document.querySelectorAll('.role-field');
         allFields.forEach(f => f.style.display = 'none');
-        
+
         if (role === 'student') {
             document.querySelectorAll('.student-field').forEach(f => f.style.display = 'block');
         } else if (role === 'faculty') {
@@ -115,7 +124,7 @@
 
     async function handleRegisterSubmit(e) {
         e.preventDefault();
-        
+
         const first_name = document.getElementById('first_name').value.trim();
         const last_name = document.getElementById('last_name').value.trim();
         const username = document.getElementById('username').value.trim();
@@ -124,7 +133,7 @@
         const role = document.getElementById('role').value;
         const password = document.getElementById('password').value;
         const confirm_password = document.getElementById('confirm_password').value;
-        
+
         if (password !== confirm_password) {
             showToast('Passwords do not match.', 'error');
             return;
@@ -168,7 +177,7 @@
                 localStorage.setItem('auth_token', res.data.token);
             }
             showToast('Account created successfully!', 'success');
-            
+
             setTimeout(() => {
                 if (role === 'faculty') {
                     window.location.href = '/dashboard/faculty/';
