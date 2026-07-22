@@ -4,8 +4,8 @@
 {% block title %}Home | Campus Event Management System{% endblock %}
 
 {% block content %}
-<!-- Hero Banner -->
-<div class="row align-items-center mb-5 py-3">
+<!-- Hero Banner Section -->
+<div class="row align-items-center mb-5 py-3 reveal-on-scroll">
     <div class="col-lg-7 mb-4 mb-lg-0">
         <div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill mb-3" style="background: rgba(99, 102, 241, 0.18); border: 1px solid rgba(99, 102, 241, 0.4);">
             <i class="bi bi-stars text-primary fs-5"></i>
@@ -22,7 +22,7 @@
         
         <div class="d-flex flex-wrap gap-3">
             <a href="#events-section" class="btn btn-glass-primary btn-lg px-4 py-3 fs-6">
-                <i class="bi bi-compass-fill me-2 fs-5"></i>Explore All Events
+                <i class="bi bi-compass-fill me-2 fs-5"></i>Explore All Events <i class="bi bi-arrow-right ms-1"></i>
             </a>
             {% if not request.user.is_authenticated %}
                 <a href="{% url 'register_page' %}" class="btn btn-glass-secondary btn-lg px-4 py-3 fs-6">
@@ -36,8 +36,8 @@
         <div class="glass-card p-4">
             <div class="row g-3">
                 <div class="col-6">
-                    <div class="stat-card">
-                        <div class="stat-icon-wrapper mx-auto mb-3" style="background: rgba(99, 102, 241, 0.25); color: #818cf8; border-color: rgba(99, 102, 241, 0.5);">
+                    <div class="stat-card d-flex flex-column align-items-center text-center p-3">
+                        <div class="stat-icon-wrapper mb-3" style="background: rgba(99, 102, 241, 0.25); color: #818cf8; border-color: rgba(99, 102, 241, 0.5);">
                             <i class="bi bi-calendar-event-fill"></i>
                         </div>
                         <h2 class="fw-bold text-white fs-1 mb-0">{{ total_events }}</h2>
@@ -46,8 +46,8 @@
                 </div>
                 
                 <div class="col-6">
-                    <div class="stat-card">
-                        <div class="stat-icon-wrapper mx-auto mb-3" style="background: rgba(16, 185, 129, 0.25); color: #34d399; border-color: rgba(16, 185, 129, 0.5); box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);">
+                    <div class="stat-card d-flex flex-column align-items-center text-center p-3">
+                        <div class="stat-icon-wrapper mb-3" style="background: rgba(16, 185, 129, 0.25); color: #34d399; border-color: rgba(16, 185, 129, 0.5); box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);">
                             <i class="bi bi-people-fill"></i>
                         </div>
                         <h2 class="fw-bold text-white fs-1 mb-0">{{ total_students }}</h2>
@@ -56,8 +56,8 @@
                 </div>
                 
                 <div class="col-6">
-                    <div class="stat-card">
-                        <div class="stat-icon-wrapper mx-auto mb-3" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24; border-color: rgba(245, 158, 11, 0.5); box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);">
+                    <div class="stat-card d-flex flex-column align-items-center text-center p-3">
+                        <div class="stat-icon-wrapper mb-3" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24; border-color: rgba(245, 158, 11, 0.5); box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);">
                             <i class="bi bi-qr-code-scan"></i>
                         </div>
                         <h2 class="fw-bold text-white fs-1 mb-0">100%</h2>
@@ -66,8 +66,8 @@
                 </div>
                 
                 <div class="col-6">
-                    <div class="stat-card">
-                        <div class="stat-icon-wrapper mx-auto mb-3" style="background: rgba(6, 182, 212, 0.25); color: #38bdf8; border-color: rgba(6, 182, 212, 0.5); box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);">
+                    <div class="stat-card d-flex flex-column align-items-center text-center p-3">
+                        <div class="stat-icon-wrapper mb-3" style="background: rgba(6, 182, 212, 0.25); color: #38bdf8; border-color: rgba(6, 182, 212, 0.5); box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);">
                             <i class="bi bi-award-fill"></i>
                         </div>
                         <h2 class="fw-bold text-white fs-1 mb-0">Auto</h2>
@@ -79,8 +79,8 @@
     </div>
 </div>
 
-<!-- Search & Categories Section -->
-<div id="events-section" class="row mb-4">
+<!-- Search & Categories Filter Bar -->
+<div id="events-section" class="row mb-4 reveal-on-scroll">
     <div class="col-12">
         <div class="glass-card p-3">
             <div class="row g-3 align-items-center">
@@ -102,11 +102,11 @@
     </div>
 </div>
 
-<!-- Category-Grouped Events Listing -->
+<!-- Category-Grouped Events Listing Grid -->
 <div id="category-events-container">
     {% for cat in categories %}
         {% if cat.events.all %}
-            <div class="category-section mb-5" data-category-id="{{ cat.id }}">
+            <div class="category-section mb-5 reveal-on-scroll" data-category-id="{{ cat.id }}">
                 <div class="d-flex align-items-center mb-3">
                     <div class="p-2.5 rounded-3 bg-primary bg-opacity-25 me-3 text-primary border border-primary border-opacity-40">
                         <i class="bi bi-collection-play-fill fs-3"></i>
@@ -123,7 +123,7 @@
                             <div class="col-12 col-md-6 col-lg-4 event-card-item" data-category="{{ cat.id }}" data-category-name="{{ cat.name|lower }}" data-title="{{ event.title|lower }}">
                                 <div class="glass-card h-100 d-flex flex-column justify-content-between p-3 position-relative overflow-hidden">
                                     <div>
-                                        <!-- Event Banner / High-Res Poster Image -->
+                                        <!-- Event Poster Image with Aspect-Ratio Fix -->
                                         <div class="event-card-img-wrapper mb-3">
                                             {% if event.banner_image %}
                                                 <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" onerror="this.onerror=null; this.src='{% static 'images/techquiz.png' %}';">
@@ -150,15 +150,15 @@
 
                                         <div class="d-flex flex-column gap-2 mb-3">
                                             <div class="event-meta-item">
-                                                <i class="bi bi-calendar-check-fill text-primary"></i>
+                                                <i class="bi bi-calendar-check-fill text-primary me-2"></i>
                                                 <span>{{ event.date|date:"d M Y" }} &bull; {{ event.time|time:"h:i A" }}</span>
                                             </div>
                                             <div class="event-meta-item">
-                                                <i class="bi bi-geo-alt-fill text-warning"></i>
+                                                <i class="bi bi-geo-alt-fill text-warning me-2"></i>
                                                 <span>{{ event.venue.venue_name|default:"TBA (Campus Auditorium)" }}</span>
                                             </div>
                                             <div class="event-meta-item">
-                                                <i class="bi bi-clock-history text-rose" style="color:#f43f5e;"></i>
+                                                <i class="bi bi-clock-history text-rose me-2" style="color:#f43f5e;"></i>
                                                 <span class="text-rose" style="color:#f43f5e;">Deadline: {{ event.deadline|date:"d M Y, h:i A" }}</span>
                                             </div>
                                         </div>
