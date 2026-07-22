@@ -8,10 +8,16 @@ if sys.version_info >= (3, 14):
         from django.template.context import RenderContext, BaseContext
         def _render_context_copy(self):
             duplicate = RenderContext()
+            duplicate.__dict__.update(self.__dict__)
+            duplicate.dicts = [d.copy() for d in self.dicts]
+            return duplicate
+        def _base_context_copy(self):
+            duplicate = self.__class__()
+            duplicate.__dict__.update(self.__dict__)
             duplicate.dicts = [d.copy() for d in self.dicts]
             return duplicate
         RenderContext.__copy__ = _render_context_copy
-        BaseContext.__copy__ = _render_context_copy
+        BaseContext.__copy__ = _base_context_copy
     except Exception:
         pass
 
