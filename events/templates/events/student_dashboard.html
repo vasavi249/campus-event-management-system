@@ -110,7 +110,7 @@
                                         
                                         <div class="d-flex gap-2">
                                             <button type="button" class="btn btn-glass-primary btn-sm flex-grow-1" 
-                                                    onclick="openVisualCertificateModal('{{ cert.event.title|escapejs }}', '{{ request.user.full_name|escapejs }}', '{{ request.user.roll_number|default:"N/A"|escapejs }}', '{{ request.user.department.name|default:"Campus Department"|escapejs }}', '{{ cert.event.date }}', '{{ cert.event.time }}', '{{ cert.event.venue.venue_name|default:"Auditorium"|escapejs }}', '{{ cert.event.certificate_template.url|default:"" }}')">
+                                                    onclick="openVisualCertificateModal('{{ cert.event.title|escapejs }}', '{{ request.user.full_name|escapejs }}', '{{ request.user.roll_number|default:"N/A"|escapejs }}', '{{ request.user.department.name|default:"Campus Department"|escapejs }}', '{{ cert.event.date }}', '{{ cert.event.time }}', '{{ cert.event.venue.venue_name|default:"Auditorium"|escapejs }}', '{% if cert.event.certificate_template %}{{ cert.event.certificate_template.url }}{% endif %}')">
                                                 <i class="bi bi-award-fill me-1"></i>View &amp; Print Certificate
                                             </button>
                                             <a href="/api/certificates/{{ cert.certificate_id }}/download/" class="btn btn-glass-secondary btn-sm" title="Download Text Copy">
