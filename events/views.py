@@ -92,20 +92,27 @@ def register_view(request):
 
 @login_required
 def student_dashboard_view(request):
-    role = (getattr(request.user, 'role', '') or 'student').lower().strip()
-    if role == 'faculty':
-        return redirect('faculty_dashboard')
-    elif role == 'organizer':
-        return redirect('organizer_dashboard')
-    elif role == 'admin' or request.user.is_superuser:
-        return redirect('admin_dashboard')
+    try:
+        role = (getattr(request.user, 'role', '') or 'student').lower().strip()
+        if role == 'faculty':
+            return redirect('faculty_dashboard')
+        elif role == 'organizer':
+            return redirect('organizer_dashboard')
+        elif role == 'admin' or request.user.is_superuser:
+            return redirect('admin_dashboard')
 
-    user = request.user
-    registrations = Registration.objects.filter(student=user).select_related('event')
-    certificates = Certificate.objects.filter(student=user).select_related('event')
-    notifications = Notification.objects.filter(user=user).order_by('-created_at')[:10]
-    categories = Category.objects.filter(events__status='published', events__approval_status='approved').distinct()
-    upcoming_events = Event.objects.filter(status='published', approval_status='approved').order_by('date')
+        user = request.user
+        registrations = Registration.objects.filter(student=user).select_related('event')
+        certificates = Certificate.objects.filter(student=user).select_related('event')
+        notifications = Notification.objects.filter(user=user).order_by('-created_at')[:10]
+        categories = Category.objects.filter(events__status='published', events__approval_status='approved').distinct()
+        upcoming_events = Event.objects.filter(status='published', approval_status='approved').order_by('date')
+    except Exception:
+        registrations = Registration.objects.none()
+        certificates = Certificate.objects.none()
+        notifications = Notification.objects.none()
+        categories = Category.objects.none()
+        upcoming_events = Event.objects.none()
 
     return render(request, 'events/student_dashboard.html', {
         'registrations': registrations,
@@ -117,15 +124,20 @@ def student_dashboard_view(request):
 
 @login_required
 def organizer_dashboard_view(request):
-    role = (getattr(request.user, 'role', '') or 'student').lower().strip()
-    if role == 'student':
-        return redirect('student_dashboard')
-    elif role == 'faculty':
-        return redirect('faculty_dashboard')
+    try:
+        role = (getattr(request.user, 'role', '') or 'student').lower().strip()
+        if role == 'student':
+            return redirect('student_dashboard')
+        elif role == 'faculty':
+            return redirect('faculty_dashboard')
 
-    events = Event.objects.filter(organizer=request.user).order_by('-date')
-    venues = Venue.objects.filter(is_available=True)
-    categories = Category.objects.all()
+        events = Event.objects.filter(organizer=request.user).order_by('-date')
+        venues = Venue.objects.filter(is_available=True)
+        categories = Category.objects.all()
+    except Exception:
+        events = Event.objects.none()
+        venues = Venue.objects.none()
+        categories = Category.objects.none()
 
     return render(request, 'events/organizer_dashboard.html', {
         'events': events,
@@ -135,19 +147,23 @@ def organizer_dashboard_view(request):
 
 @login_required
 def faculty_dashboard_view(request):
-    role = (getattr(request.user, 'role', '') or 'student').lower().strip()
-    if role == 'student':
-        return redirect('student_dashboard')
-    elif role == 'organizer':
-        return redirect('organizer_dashboard')
+    try:
+        role = (getattr(request.user, 'role', '') or 'student').lower().strip()
+        if role == 'student':
+            return redirect('student_dashboard')
+        elif role == 'organizer':
+            return redirect('organizer_dashboard')
 
-    dept = request.user.department
-    if dept:
-        pending_events = Event.objects.filter(approval_status='pending', department=dept).order_by('date')
-    else:
-        pending_events = Event.objects.filter(approval_status='pending').order_by('date')
+        dept = getattr(request.user, 'department', None)
+        if dept:
+            pending_events = Event.objects.filter(approval_status='pending', department=dept).order_by('date')
+        else:
+            pending_events = Event.objects.filter(approval_status='pending').order_by('date')
 
-    approved_events = Event.objects.filter(approval_status='approved').order_by('date')
+        approved_events = Event.objects.filter(approval_status='approved').order_by('date')
+    except Exception:
+        pending_events = Event.objects.none()
+        approved_events = Event.objects.none()
 
     return render(request, 'events/faculty_dashboard.html', {
         'pending_events': pending_events,
@@ -156,21 +172,30 @@ def faculty_dashboard_view(request):
 
 @login_required
 def admin_dashboard_view(request):
-    role = (getattr(request.user, 'role', '') or 'student').lower().strip()
-    if role not in ['admin'] and not request.user.is_superuser:
-        if role == 'faculty':
-            return redirect('faculty_dashboard')
-        elif role == 'organizer':
-            return redirect('organizer_dashboard')
-        return redirect('student_dashboard')
+    try:
+        role = (getattr(request.user, 'role', '') or 'student').lower().strip()
+        if role not in ['admin'] and not request.user.is_superuser:
+            if role == 'faculty':
+                return redirect('faculty_dashboard')
+            elif role == 'organizer':
+                return redirect('organizer_dashboard')
+            return redirect('student_dashboard')
 
-    analytics = get_dashboard_analytics()
-    users = User.objects.all().order_by('-date_joined')[:10]
-    events = Event.objects.all().order_by('-date')[:10]
-    departments = Department.objects.all()
-    clubs = Club.objects.all()
-    categories = Category.objects.all()
-    venues = Venue.objects.filter(is_available=True)
+        analytics = get_dashboard_analytics()
+        users = User.objects.all().order_by('-date_joined')[:10]
+        events = Event.objects.all().order_by('-date')[:10]
+        departments = Department.objects.all()
+        clubs = Club.objects.all()
+        categories = Category.objects.all()
+        venues = Venue.objects.filter(is_available=True)
+    except Exception:
+        analytics = {'total_students': 0, 'total_organizers': 0, 'total_faculty': 0, 'total_events': 0, 'total_registrations': 0}
+        users = User.objects.none()
+        events = Event.objects.none()
+        departments = Department.objects.none()
+        clubs = Club.objects.none()
+        categories = Category.objects.none()
+        venues = Venue.objects.none()
 
     return render(request, 'events/admin_dashboard.html', {
         'analytics': analytics,

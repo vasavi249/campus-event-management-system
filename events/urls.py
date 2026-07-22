@@ -14,9 +14,14 @@ urlpatterns = [
     
     # Dashboards
     path('dashboard/student/', views.student_dashboard_view, name='student_dashboard'),
+    path('dashboard/student', views.student_dashboard_view, name='student_dashboard_alt'),
     path('dashboard/organizer/', views.organizer_dashboard_view, name='organizer_dashboard'),
+    path('dashboard/organizer', views.organizer_dashboard_view, name='organizer_dashboard_alt'),
     path('dashboard/faculty/', views.faculty_dashboard_view, name='faculty_dashboard'),
+    path('dashboard/faculty', views.faculty_dashboard_view, name='faculty_dashboard_alt'),
     path('dashboard/admin/', views.admin_dashboard_view, name='admin_dashboard'),
+    path('dashboard/admin', views.admin_dashboard_view, name='admin_dashboard_alt'),
+
     
     # Events management
     path('event/<int:id>/', views.event_detail_view, name='event_detail_page'),
