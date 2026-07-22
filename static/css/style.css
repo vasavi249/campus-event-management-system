@@ -125,6 +125,42 @@ h1, h2, h3, h4, h5, h6, .font-heading {
     transform: translateY(-1px);
 }
 
+/* Dropdown Menus Fix (Overrides Bootstrap White Background) */
+.dropdown-menu,
+.dropdown-menu.show,
+.glass-dropdown {
+    background-color: #0f172a !important;
+    background: #0f172a !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.85) !important;
+    padding: 0.6rem !important;
+}
+
+.dropdown-item, 
+.dropdown-menu a, 
+.dropdown-menu-item {
+    color: #f8fafc !important;
+    padding: 0.65rem 1rem !important;
+    font-weight: 600 !important;
+    border-radius: 0.5rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.dropdown-item:hover, 
+.dropdown-menu a:hover, 
+.dropdown-menu-item:hover {
+    background: rgba(99, 102, 241, 0.25) !important;
+    color: #ffffff !important;
+}
+
+.dropdown-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+    margin: 0.5rem 0 !important;
+}
+
 /* Glass Cards */
 .glass-card {
     background: var(--card-bg);

@@ -126,11 +126,11 @@
                                         <!-- Event Banner / High-Res Poster Image -->
                                         <div class="event-card-img-wrapper mb-3">
                                             {% if event.banner_image %}
-                                                <img src="{{ event.banner_image.url }}" alt="{{ event.title }}">
+                                                <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" onerror="this.onerror=null; this.src='{% static 'images/techquiz.png' %}';">
                                             {% elif cat.name|lower == 'technical' or 'hackathon' in event.title|lower %}
-                                                <img src="{% static 'images/hackathon.png' %}" alt="{{ event.title }}">
+                                                <img src="{% static 'images/hackathon.png' %}" alt="{{ event.title }}" onerror="this.onerror=null; this.src='{% static 'images/techquiz.png' %}';">
                                             {% elif cat.name|lower == 'cultural' or 'cultural' in event.title|lower %}
-                                                <img src="{% static 'images/cultural.png' %}" alt="{{ event.title }}">
+                                                <img src="{% static 'images/cultural.png' %}" alt="{{ event.title }}" onerror="this.onerror=null; this.src='{% static 'images/techquiz.png' %}';">
                                             {% else %}
                                                 <img src="{% static 'images/techquiz.png' %}" alt="{{ event.title }}">
                                             {% endif %}
