@@ -92,6 +92,14 @@ def register_view(request):
 
 @login_required
 def student_dashboard_view(request):
+    role = (getattr(request.user, 'role', '') or 'student').lower().strip()
+    if role == 'faculty':
+        return redirect('faculty_dashboard')
+    elif role == 'organizer':
+        return redirect('organizer_dashboard')
+    elif role == 'admin' or request.user.is_superuser:
+        return redirect('admin_dashboard')
+
     user = request.user
     registrations = Registration.objects.filter(student=user).select_related('event')
     certificates = Certificate.objects.filter(student=user).select_related('event')
@@ -109,13 +117,16 @@ def student_dashboard_view(request):
 
 @login_required
 def organizer_dashboard_view(request):
-    if request.user.role not in ['organizer', 'admin'] and not request.user.is_superuser:
-        return redirect('home')
-        
+    role = (getattr(request.user, 'role', '') or 'student').lower().strip()
+    if role == 'student':
+        return redirect('student_dashboard')
+    elif role == 'faculty':
+        return redirect('faculty_dashboard')
+
     events = Event.objects.filter(organizer=request.user).order_by('-date')
     venues = Venue.objects.filter(is_available=True)
     categories = Category.objects.all()
-    
+
     return render(request, 'events/organizer_dashboard.html', {
         'events': events,
         'venues': venues,
@@ -124,12 +135,20 @@ def organizer_dashboard_view(request):
 
 @login_required
 def faculty_dashboard_view(request):
-    if request.user.role not in ['faculty', 'admin'] and not request.user.is_superuser:
-        return redirect('home')
-        
-    pending_events = Event.objects.filter(approval_status='pending').order_by('date')
+    role = (getattr(request.user, 'role', '') or 'student').lower().strip()
+    if role == 'student':
+        return redirect('student_dashboard')
+    elif role == 'organizer':
+        return redirect('organizer_dashboard')
+
+    dept = request.user.department
+    if dept:
+        pending_events = Event.objects.filter(approval_status='pending', department=dept).order_by('date')
+    else:
+        pending_events = Event.objects.filter(approval_status='pending').order_by('date')
+
     approved_events = Event.objects.filter(approval_status='approved').order_by('date')
-    
+
     return render(request, 'events/faculty_dashboard.html', {
         'pending_events': pending_events,
         'approved_events': approved_events
@@ -137,9 +156,14 @@ def faculty_dashboard_view(request):
 
 @login_required
 def admin_dashboard_view(request):
-    if request.user.role != 'admin' and not request.user.is_superuser:
-        return redirect('home')
-        
+    role = (getattr(request.user, 'role', '') or 'student').lower().strip()
+    if role not in ['admin'] and not request.user.is_superuser:
+        if role == 'faculty':
+            return redirect('faculty_dashboard')
+        elif role == 'organizer':
+            return redirect('organizer_dashboard')
+        return redirect('student_dashboard')
+
     analytics = get_dashboard_analytics()
     users = User.objects.all().order_by('-date_joined')[:10]
     events = Event.objects.all().order_by('-date')[:10]
