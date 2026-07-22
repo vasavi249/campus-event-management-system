@@ -102,128 +102,117 @@
     </div>
 </div>
 
-<!-- Category-Grouped Events Listing Grid -->
-<div id="category-events-container">
-    {% for cat in categories %}
-        {% if cat.events.all %}
-            <div class="category-section mb-5 reveal-on-scroll" data-category-id="{{ cat.id }}">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="p-2.5 rounded-3 bg-primary bg-opacity-25 me-3 text-primary border border-primary border-opacity-40">
-                        <i class="bi bi-collection-play-fill fs-3"></i>
-                    </div>
-                    <div>
-                        <h3 class="fw-bold text-white mb-0 fs-3">{{ cat.name }}</h3>
-                        <span class="text-secondary small">{{ cat.description|default:"Explore top events in this category" }}</span>
-                    </div>
-                </div>
+<!-- Unified Side-By-Side Events Grid Container -->
+<div id="events-grid-wrapper" class="mb-5 reveal-on-scroll">
+    <div class="row g-4" id="all-events-row">
+        {% for cat in categories %}
+            {% for event in cat.events.all %}
+                {% if event.approval_status == 'approved' and event.status == 'published' %}
+                    <div class="col-12 col-md-6 col-lg-4 event-card-item" data-category="{{ cat.id }}" data-category-name="{{ cat.name|lower }}" data-title="{{ event.title|lower }}">
+                        <div class="glass-card h-100 d-flex flex-column justify-content-between p-3 position-relative overflow-hidden">
+                            <div>
+                                <!-- Event Poster Image -->
+                                <div class="event-card-img-wrapper mb-3">
+                                    {% if event.banner_image %}
+                                        <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" onerror="this.onerror=null; this.src='{% static 'images/techquiz.png' %}';">
+                                    {% elif cat.name|lower == 'technical' or 'hackathon' in event.title|lower %}
+                                        <img src="{% static 'images/hackathon.png' %}" alt="{{ event.title }}" onerror="this.onerror=null; this.src='{% static 'images/techquiz.png' %}';">
+                                    {% elif cat.name|lower == 'cultural' or 'cultural' in event.title|lower %}
+                                        <img src="{% static 'images/cultural.png' %}" alt="{{ event.title }}" onerror="this.onerror=null; this.src='{% static 'images/techquiz.png' %}';">
+                                    {% else %}
+                                        <img src="{% static 'images/techquiz.png' %}" alt="{{ event.title }}">
+                                    {% endif %}
+                                </div>
 
-                <div class="row g-4">
-                    {% for event in cat.events.all %}
-                        {% if event.approval_status == 'approved' and event.status == 'published' %}
-                            <div class="col-12 col-md-6 col-lg-4 event-card-item" data-category="{{ cat.id }}" data-category-name="{{ cat.name|lower }}" data-title="{{ event.title|lower }}">
-                                <div class="glass-card h-100 d-flex flex-column justify-content-between p-3 position-relative overflow-hidden">
-                                    <div>
-                                        <!-- Event Poster Image with Aspect-Ratio Fix -->
-                                        <div class="event-card-img-wrapper mb-3">
-                                            {% if event.banner_image %}
-                                                <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" onerror="this.onerror=null; this.src='{% static 'images/techquiz.png' %}';">
-                                            {% elif cat.name|lower == 'technical' or 'hackathon' in event.title|lower %}
-                                                <img src="{% static 'images/hackathon.png' %}" alt="{{ event.title }}" onerror="this.onerror=null; this.src='{% static 'images/techquiz.png' %}';">
-                                            {% elif cat.name|lower == 'cultural' or 'cultural' in event.title|lower %}
-                                                <img src="{% static 'images/cultural.png' %}" alt="{{ event.title }}" onerror="this.onerror=null; this.src='{% static 'images/techquiz.png' %}';">
-                                            {% else %}
-                                                <img src="{% static 'images/techquiz.png' %}" alt="{{ event.title }}">
-                                            {% endif %}
-                                        </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge badge-indigo-glass">
+                                        <i class="bi bi-tag-fill me-1"></i>{{ cat.name }}
+                                    </span>
+                                    <span class="badge badge-success-glass font-monospace fw-bold fs-6">
+                                        {% if event.registration_fee > 0 %}₹{{ event.registration_fee }}{% else %}FREE{% endif %}
+                                    </span>
+                                </div>
 
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <span class="badge badge-indigo-glass">
-                                                <i class="bi bi-tag-fill me-1"></i>{{ cat.name }}
-                                            </span>
-                                            <span class="badge badge-success-glass font-monospace fw-bold fs-6">
-                                                {% if event.registration_fee > 0 %}₹{{ event.registration_fee }}{% else %}FREE{% endif %}
-                                            </span>
-                                        </div>
+                                <h4 class="fw-bold text-white mb-2 fs-4">{{ event.title }}</h4>
+                                <p class="text-secondary small mb-3 line-clamp-2" style="min-height: 2.4rem;">{{ event.description|truncatewords:18 }}</p>
 
-                                        <h4 class="fw-bold text-white mb-2 fs-4">{{ event.title }}</h4>
-                                        <p class="text-secondary small mb-3 line-clamp-2" style="min-height: 2.4rem;">{{ event.description|truncatewords:18 }}</p>
-
-                                        <div class="d-flex flex-column gap-2 mb-3">
-                                            <div class="event-meta-item">
-                                                <i class="bi bi-calendar-check-fill text-primary me-2"></i>
-                                                <span>{{ event.date|date:"d M Y" }} &bull; {{ event.time|time:"h:i A" }}</span>
-                                            </div>
-                                            <div class="event-meta-item">
-                                                <i class="bi bi-geo-alt-fill text-warning me-2"></i>
-                                                <span>{{ event.venue.venue_name|default:"TBA (Campus Auditorium)" }}</span>
-                                            </div>
-                                            <div class="event-meta-item">
-                                                <i class="bi bi-clock-history text-rose me-2" style="color:#f43f5e;"></i>
-                                                <span class="text-rose" style="color:#f43f5e;">Deadline: {{ event.deadline|date:"d M Y, h:i A" }}</span>
-                                            </div>
-                                        </div>
+                                <div class="d-flex flex-column gap-2 mb-3">
+                                    <div class="event-meta-item">
+                                        <i class="bi bi-calendar-check-fill text-primary me-2"></i>
+                                        <span>{{ event.date|date:"d M Y" }} &bull; {{ event.time|time:"h:i A" }}</span>
                                     </div>
-
-                                    <div class="pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
-                                        <span class="text-secondary small"><i class="bi bi-person-fill me-1 text-primary"></i>{{ event.organizer.username }}</span>
-                                        <a href="{% url 'event_detail_page' event.event_id %}" class="btn btn-glass-primary btn-sm px-3 py-2">
-                                            View Details <i class="bi bi-arrow-right ms-1"></i>
-                                        </a>
+                                    <div class="event-meta-item">
+                                        <i class="bi bi-geo-alt-fill text-warning me-2"></i>
+                                        <span>{{ event.venue.venue_name|default:"TBA (Campus Auditorium)" }}</span>
+                                    </div>
+                                    <div class="event-meta-item">
+                                        <i class="bi bi-clock-history text-rose me-2" style="color:#f43f5e;"></i>
+                                        <span class="text-rose" style="color:#f43f5e;">Deadline: {{ event.deadline|date:"d M Y, h:i A" }}</span>
                                     </div>
                                 </div>
                             </div>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-        {% endif %}
-    {% empty %}
-        <div class="glass-card text-center py-5">
-            <i class="bi bi-calendar-x text-muted fs-1"></i>
-            <h4 class="text-muted mt-3">No active events found.</h4>
+
+                            <div class="pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                                <span class="text-secondary small"><i class="bi bi-person-fill me-1 text-primary"></i>{{ event.organizer.username }}</span>
+                                <a href="{% url 'event_detail_page' event.event_id %}" class="btn btn-glass-primary btn-sm px-3 py-2">
+                                    View Details <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    <!-- Empty State if no events match search/filter -->
+    <div id="no-events-empty-state" class="glass-card text-center py-5" style="display: none;">
+        <div class="stat-icon-wrapper mx-auto mb-3" style="width: 70px; height: 70px; font-size: 2.2rem; background: rgba(99, 102, 241, 0.2);">
+            <i class="bi bi-calendar-x text-primary"></i>
         </div>
-    {% endfor %}
+        <h4 class="text-white fw-bold mb-2">No Matching Events Found</h4>
+        <p class="text-secondary small mb-0">Try adjusting your search query or switching category filter tab.</p>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+    let activeCategoryId = 'all';
+
     function filterEvents() {
         const query = document.getElementById('event-search-input').value.toLowerCase().trim();
         const cards = document.querySelectorAll('.event-card-item');
+        let visibleCount = 0;
 
         cards.forEach(card => {
             const title = (card.getAttribute('data-title') || '').toLowerCase();
             const categoryName = (card.getAttribute('data-category-name') || '').toLowerCase();
-            const isMatch = title.includes(query) || categoryName.includes(query);
-            card.style.display = isMatch ? 'block' : 'none';
+            const cardCatId = card.getAttribute('data-category');
+            
+            const matchesQuery = title.includes(query) || categoryName.includes(query);
+            const matchesCat = (activeCategoryId === 'all' || cardCatId === activeCategoryId);
+
+            if (matchesQuery && matchesCat) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
         });
 
-        updateCategorySectionVisibilities();
+        const emptyState = document.getElementById('no-events-empty-state');
+        if (emptyState) {
+            emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+        }
     }
 
     function filterCategory(catId, btn) {
+        activeCategoryId = String(catId);
         document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active', 'btn-glass-primary'));
         btn.classList.add('active', 'btn-glass-primary');
 
-        const sections = document.querySelectorAll('.category-section');
-        sections.forEach(section => {
-            const secCatId = section.getAttribute('data-category-id');
-            if (catId === 'all' || secCatId === catId) {
-                section.style.display = 'block';
-                section.querySelectorAll('.event-card-item').forEach(card => card.style.display = 'block');
-            } else {
-                section.style.display = 'none';
-            }
-        });
-    }
-
-    function updateCategorySectionVisibilities() {
-        const sections = document.querySelectorAll('.category-section');
-        sections.forEach(section => {
-            const visibleCards = Array.from(section.querySelectorAll('.event-card-item')).filter(card => card.style.display !== 'none');
-            section.style.display = visibleCards.length > 0 ? 'block' : 'none';
-        });
+        filterEvents();
     }
 </script>
 {% endblock %}
