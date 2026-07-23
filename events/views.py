@@ -173,7 +173,10 @@ def faculty_dashboard_view(request):
 
         dept = getattr(request.user, 'department', None)
         if dept:
-            pending_events = Event.objects.filter(approval_status='pending', department=dept).order_by('date')
+            pending_events = Event.objects.filter(
+                Q(department=dept) | Q(department__isnull=True),
+                approval_status='pending'
+            ).order_by('date')
         else:
             pending_events = Event.objects.filter(approval_status='pending').order_by('date')
 
