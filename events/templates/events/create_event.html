@@ -61,12 +61,21 @@
                         <input type="number" id="registration_fee" class="form-control form-control-glass" value="0.00" step="0.01" min="0">
                     </div>
 
-                    <div class="col-12">
+                    <div class="col-12 col-md-6">
                         <label class="form-label text-white fw-bold"><i class="bi bi-image text-info me-1"></i>Event Banner / Poster Image</label>
                         <input type="file" id="banner_image" class="form-control form-control-glass" accept="image/*" onchange="previewBannerImage(event)">
-                        <div class="form-text text-muted small">Upload high-resolution event banner (PNG, JPG, WebP). Max 5MB.</div>
+                        <div class="form-text text-muted small">Upload high-resolution event poster (PNG, JPG, WebP).</div>
                         <div id="banner-preview-container" class="mt-2" style="display: none;">
-                            <img id="banner-preview" src="" alt="Poster Preview" class="img-fluid rounded-3 border border-secondary" style="max-height: 160px; object-fit: cover;">
+                            <img id="banner-preview" src="" alt="Poster Preview" class="img-fluid rounded-3 border border-secondary" style="max-height: 140px; object-fit: cover;">
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-white fw-bold"><i class="bi bi-award text-warning me-1"></i>Certificate Template Background Image</label>
+                        <input type="file" id="certificate_template" class="form-control form-control-glass" accept="image/*" onchange="previewCertTemplateImage(event)">
+                        <div class="form-text text-muted small">Upload custom certificate layout background.</div>
+                        <div id="cert-preview-container" class="mt-2" style="display: none;">
+                            <img id="cert-preview" src="" alt="Certificate Template Preview" class="img-fluid rounded-3 border border-warning" style="max-height: 140px; object-fit: cover;">
                         </div>
                     </div>
 
@@ -105,6 +114,23 @@
         }
     }
 
+    function previewCertTemplateImage(event) {
+        const file = event.target.files[0];
+        const container = document.getElementById('cert-preview-container');
+        const img = document.getElementById('cert-preview');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                container.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
     async function handleCreateEventSubmit(e) {
         e.preventDefault();
 
@@ -122,8 +148,13 @@
         formData.append('approval_status', 'pending');
 
         const fileInput = document.getElementById('banner_image');
-        if (fileInput.files.length > 0) {
+        if (fileInput && fileInput.files.length > 0) {
             formData.append('banner_image', fileInput.files[0]);
+        }
+
+        const certInput = document.getElementById('certificate_template');
+        if (certInput && certInput.files.length > 0) {
+            formData.append('certificate_template', certInput.files[0]);
         }
 
         const res = await apiCall('/api/events/', 'POST', formData);
