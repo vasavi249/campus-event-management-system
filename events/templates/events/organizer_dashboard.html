@@ -43,7 +43,7 @@
                                 <tr>
                                     <td>
                                         {% if event.banner_image %}
-                                            <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" style="width: 55px; height: 35px; object-fit: cover; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2);">
+                                            <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" style="width: 55px; height: 35px; object-fit: cover; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2);" onerror="this.onerror=null; this.src='{% static 'images/banners/tech_banner.png' %}';">
                                         {% else %}
                                             <span class="badge bg-secondary opacity-75 small">No Poster</span>
                                         {% endif %}

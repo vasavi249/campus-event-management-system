@@ -466,7 +466,7 @@
                 adminEventsCache[event.event_id] = event;
 
                 const poster = event.banner_image_url ? 
-                    `<img src="${event.banner_image_url}" alt="${event.title}" style="height: 50px; width: 80px; object-fit: cover; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2);">` :
+                    `<img src="${event.banner_image_url}" alt="${event.title}" style="height: 50px; width: 80px; object-fit: cover; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2);" onerror="this.onerror=null; this.src='/static/images/banners/tech_banner.png';">` :
                     `<span class="badge bg-secondary p-2"><i class="bi bi-image me-1"></i>No Poster</span>`;
 
                 html += `
@@ -530,6 +530,9 @@
 
         if (evt.banner_image_url) {
             img.src = evt.banner_image_url;
+            img.onerror = function() {
+                this.src = '/static/images/banners/tech_banner.png';
+            };
             box.style.display = 'block';
         } else {
             box.style.display = 'none';
