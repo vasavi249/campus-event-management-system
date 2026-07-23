@@ -21,15 +21,18 @@
     <div class="col-12 col-lg-8">
         <div class="glass-card">
             <!-- Event Banner Image Container -->
-            <div class="event-card-img-wrapper mb-4" style="height: 340px; aspect-ratio: auto;">
+            <div class="event-card-img-wrapper mb-4" style="height: 340px; aspect-ratio: auto; border-radius: 12px; overflow: hidden;">
                 {% if event.banner_image %}
-                    <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" onerror="this.onerror=null; this.src='{% static 'images/techquiz.png' %}';">
-                {% elif event.category.name|lower == 'technical' or 'hackathon' in event.title|lower %}
-                    <img src="{% static 'images/hackathon.png' %}" alt="{{ event.title }}" onerror="this.onerror=null; this.src='{% static 'images/techquiz.png' %}';">
-                {% elif event.category.name|lower == 'cultural' or 'cultural' in event.title|lower %}
-                    <img src="{% static 'images/cultural.png' %}" alt="{{ event.title }}" onerror="this.onerror=null; this.src='{% static 'images/techquiz.png' %}';">
+                    <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" style="width:100%; height:100%; object-fit:cover;">
                 {% else %}
-                    <img src="{% static 'images/techquiz.png' %}" alt="{{ event.title }}">
+                    <div class="d-flex flex-column justify-content-center align-items-center h-100 p-4 text-center position-relative" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98)); border: 1px solid rgba(255, 255, 255, 0.15);">
+                        <div class="position-absolute opacity-10">
+                            <i class="bi bi-stars display-1 text-info"></i>
+                        </div>
+                        <span class="badge badge-indigo-glass fs-6 mb-3"><i class="bi bi-tag-fill me-1"></i>{{ event.category.name }}</span>
+                        <h2 class="fw-bold text-white mb-2 fs-1 px-3" style="z-index: 1;">{{ event.title }}</h2>
+                        <p class="text-info opacity-90 mb-0 fs-6" style="z-index: 1;"><i class="bi bi-geo-alt-fill me-1"></i>{{ event.venue.venue_name|default:"Campus Venue" }}</p>
+                    </div>
                 {% endif %}
             </div>
 

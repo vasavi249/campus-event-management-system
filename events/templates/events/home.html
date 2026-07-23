@@ -112,15 +112,18 @@
                         <div class="glass-card h-100 d-flex flex-column justify-content-between p-3 position-relative overflow-hidden">
                             <div>
                                 <!-- Event Poster Image -->
-                                <div class="event-card-img-wrapper mb-3">
+                                <div class="event-card-img-wrapper mb-3" style="height:180px; border-radius: 8px; overflow: hidden;">
                                     {% if event.banner_image %}
-                                        <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" onerror="this.onerror=null; this.src='{% static 'images/techquiz.png' %}';">
-                                    {% elif cat.name|lower == 'technical' or 'hackathon' in event.title|lower %}
-                                        <img src="{% static 'images/hackathon.png' %}" alt="{{ event.title }}" onerror="this.onerror=null; this.src='{% static 'images/techquiz.png' %}';">
-                                    {% elif cat.name|lower == 'cultural' or 'cultural' in event.title|lower %}
-                                        <img src="{% static 'images/cultural.png' %}" alt="{{ event.title }}" onerror="this.onerror=null; this.src='{% static 'images/techquiz.png' %}';">
+                                        <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" style="width:100%; height:100%; object-fit:cover;">
                                     {% else %}
-                                        <img src="{% static 'images/techquiz.png' %}" alt="{{ event.title }}">
+                                        <div class="d-flex flex-column justify-content-center align-items-center h-100 p-3 text-center rounded-3 position-relative overflow-hidden" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98)); border: 1px solid rgba(255, 255, 255, 0.15);">
+                                            <div class="position-absolute top-0 end-0 p-3 opacity-25">
+                                                <i class="bi bi-calendar-event display-1 text-primary"></i>
+                                            </div>
+                                            <span class="badge bg-primary bg-opacity-25 text-primary mb-2 border border-primary border-opacity-25">{{ cat.name }}</span>
+                                            <h5 class="fw-bold text-white mb-1 line-clamp-2 px-2" style="font-size: 1.1rem; z-index: 1;">{{ event.title }}</h5>
+                                            <small class="text-secondary opacity-75" style="z-index: 1;"><i class="bi bi-geo-alt me-1"></i>{{ event.venue.venue_name|default:"Campus Venue" }}</small>
+                                        </div>
                                     {% endif %}
                                 </div>
 
