@@ -185,12 +185,15 @@ def populate():
         }
     )
 
+    event1.banner_image = 'event_banners/tech_banner.png'
     event1.registration_fee = 250.00
     event1.save()
 
+    event2.banner_image = 'event_banners/workshop_banner.png'
     event2.registration_fee = 150.00
     event2.save()
 
+    event3.banner_image = 'event_banners/cultural_banner.png'
     event3.registration_fee = 100.00
     event3.approval_status = 'approved'
     event3.save()
