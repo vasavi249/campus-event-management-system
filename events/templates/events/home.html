@@ -180,10 +180,12 @@
                                 </div>
                             </div>
 
-                            <div class="pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
-                                <span class="text-secondary small"><i class="bi bi-person-fill me-1 text-primary"></i>{{ event.organizer.username }}</span>
-                                <a href="{% url 'event_detail_page' event.event_id %}" class="btn btn-glass-primary btn-sm px-3 py-2">
-                                    Read Full Details &amp; Register <i class="bi bi-arrow-right ms-1"></i>
+                            <div class="pt-3 border-top border-secondary border-opacity-25 mt-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-secondary small"><i class="bi bi-person-fill me-1 text-primary"></i>Host: <strong>{{ event.organizer.full_name|default:event.organizer.username }}</strong></span>
+                                </div>
+                                <a href="{% url 'event_detail_page' event.event_id %}" class="btn btn-glass-primary w-100 py-2.5 fs-6 text-center">
+                                    View Details &amp; Register <i class="bi bi-arrow-right ms-1"></i>
                                 </a>
                             </div>
                         </div>
