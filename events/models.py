@@ -112,7 +112,9 @@ class Event(models.Model):
             return self.department.name
         if self.organizer and getattr(self.organizer, 'department', None) and getattr(self.organizer.department, 'name', None):
             return self.organizer.department.name
-        return "Campus Department"
+        if self.club and getattr(self.club, 'department', None) and getattr(self.club.department, 'name', None):
+            return self.club.department.name
+        return "Department of Computer Science & Engineering"
 
     @property
     def department_code(self):
@@ -120,7 +122,17 @@ class Event(models.Model):
             return self.department.code
         if self.organizer and getattr(self.organizer, 'department', None) and getattr(self.organizer.department, 'code', None):
             return self.organizer.department.code
-        return "CAMPUS"
+        if self.club and getattr(self.club, 'department', None) and getattr(self.club.department, 'code', None):
+            return self.club.department.code
+        return "CSE"
+
+    def save(self, *args, **kwargs):
+        if not self.department:
+            if self.organizer and getattr(self.organizer, 'department', None):
+                self.department = self.organizer.department
+            elif self.club and getattr(self.club, 'department', None):
+                self.department = self.club.department
+        super().save(*args, **kwargs)
 
     def clean(self):
         if self.deadline and self.date and self.time:

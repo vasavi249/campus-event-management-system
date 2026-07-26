@@ -191,16 +191,19 @@ def populate():
     event1.banner_image = 'event_banners/tech_banner.png'
     event1.registration_fee = 250.00
     event1.skills_learned = "Full-Stack Web Dev, Rapid Prototyping, AI Integration, Team Leadership, Pitching & Demo"
+    event1.department = dept_cs
     event1.save()
 
     event2.banner_image = 'event_banners/workshop_banner.png'
     event2.registration_fee = 150.00
     event2.skills_learned = "Python Programming, PyTorch, Neural Networks, Model Fine-Tuning, Data Preprocessing"
+    event2.department = dept_cs
     event2.save()
 
     event3.banner_image = 'event_banners/cultural_banner.png'
     event3.registration_fee = 100.00
     event3.skills_learned = "Stage Performance, Event Management, Public Relations, Creative Design, Team Collaboration"
+    event3.department = dept_cs
     event3.approval_status = 'approved'
     event3.save()
 

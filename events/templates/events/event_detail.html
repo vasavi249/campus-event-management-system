@@ -67,6 +67,19 @@
                         </span>
                     </div>
                 </div>
+
+                <!-- Conducting Department Notice Banner -->
+                <div class="p-3 glass-card bg-info bg-opacity-10 border border-info border-opacity-25 rounded-3 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-building-fill text-info fs-4"></i>
+                        <div>
+                            <small class="text-secondary d-block" style="font-size:0.75rem;">Hosted &amp; Conducted By Department</small>
+                            <span class="fw-bold text-white fs-6">{{ event.department_name }}</span>
+                        </div>
+                    </div>
+                    <span class="badge bg-info text-dark font-monospace px-3 py-1 fw-bold fs-6">Official Department Event</span>
+                </div>
+
                 <div class="text-secondary leading-relaxed fs-6" style="white-space: pre-line; line-height: 1.75;">
                     {{ event.description }}
                 </div>
