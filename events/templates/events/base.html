@@ -290,9 +290,14 @@
                 </div>
                 <div class="modal-body py-3">
                     <p class="text-secondary small mb-3" id="proofStudentName">Uploaded Payment Screenshot</p>
-                    <div class="p-3 glass-card bg-dark bg-opacity-75 rounded-3 mb-3 border border-secondary border-opacity-25 text-center">
-                        <img id="proofModalImage" src="" alt="Payment Proof" class="img-fluid rounded-3" style="max-height: 65vh; object-fit: contain;" onerror="handleProofImageError(this, 'Payment Screenshot')">
+                    
+                    <div id="proofImageContainer" class="p-3 glass-card bg-dark bg-opacity-75 rounded-3 mb-3 border border-secondary border-opacity-25 text-center">
+                        <img id="proofModalImage" src="" alt="Student Uploaded Payment Proof" class="img-fluid rounded-3" style="max-height: 65vh; object-fit: contain;">
+                        <p id="proofMissingText" class="text-warning small my-4" style="display: none;">
+                            <i class="bi bi-exclamation-triangle me-1"></i>No student payment screenshot uploaded or file unavailable.
+                        </p>
                     </div>
+
                     <div class="d-flex justify-content-between gap-2">
                         <a id="proofDownloadLink" href="" target="_blank" class="btn btn-glass-secondary px-4"><i class="bi bi-box-arrow-up-right me-1"></i>Open Direct Image Link</a>
                         <button type="button" class="btn btn-glass-primary px-4" data-bs-dismiss="modal">Close</button>
@@ -303,30 +308,36 @@
     </div>
 
     <script>
-        function handleProofImageError(img, titleText) {
-            img.onerror = null;
-            const label = titleText || 'Payment Screenshot';
-            const svgData = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='360' viewBox='0 0 600 360'><rect width='600' height='360' fill='%230F172A' rx='16'/><rect x='20' y='20' width='560' height='320' rx='12' fill='%231E293B' stroke='%236366F1' stroke-width='2' stroke-dasharray='6 6'/><path d='M260 130 L300 170 L340 130 M300 170 L300 100' stroke='%23818CF8' stroke-width='4' stroke-linecap='round'/><text x='300' y='210' font-family='system-ui, sans-serif' font-size='18' font-weight='bold' fill='%23FFFFFF' text-anchor='middle'>" + label + "</text><text x='300' y='245' font-family='system-ui, sans-serif' font-size='13' fill='%23F43F5E' text-anchor='middle'>Uploaded file missing or reset during cloud redeployment</text><text x='300' y='275' font-family='system-ui, sans-serif' font-size='12' fill='%2394A3B8' text-anchor='middle'>New uploads are saved &amp; tracked cleanly on fresh registrations</text></svg>";
-            img.src = svgData;
-        }
-
         function showProofModal(imgUrl, studentName) {
-            if (!imgUrl) {
-                showToast('Payment screenshot URL is not available.', 'error');
-                return;
-            }
             const img = document.getElementById('proofModalImage');
             const link = document.getElementById('proofDownloadLink');
             const subtitle = document.getElementById('proofStudentName');
+            const missingText = document.getElementById('proofMissingText');
 
-            if (img) {
-                img.onerror = function() {
-                    handleProofImageError(img, 'Uploaded Payment Screenshot');
-                };
-                img.src = imgUrl;
+            if (subtitle) {
+                subtitle.textContent = 'Uploaded Payment Proof by ' + (studentName || 'Student');
             }
-            if (link) link.href = imgUrl;
-            if (subtitle) subtitle.textContent = 'Uploaded Payment Proof by ' + (studentName || 'Student');
+
+            if (!imgUrl) {
+                if (img) img.style.display = 'none';
+                if (missingText) missingText.style.display = 'block';
+                if (link) link.style.display = 'none';
+            } else {
+                if (img) {
+                    img.style.display = 'inline-block';
+                    img.onerror = function() {
+                        img.style.display = 'none';
+                        if (missingText) missingText.style.display = 'block';
+                        if (link) link.style.display = 'none';
+                    };
+                    img.src = imgUrl;
+                }
+                if (missingText) missingText.style.display = 'none';
+                if (link) {
+                    link.style.display = 'inline-block';
+                    link.href = imgUrl;
+                }
+            }
 
             const modalEl = document.getElementById('paymentProofModal');
             if (modalEl) {
