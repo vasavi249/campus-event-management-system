@@ -16,7 +16,7 @@
                         <input type="text" id="title" class="form-control form-control-glass" value="{{ event.title }}" required>
                     </div>
 
-                    <div class="col-12 col-sm-6">
+                    <div class="col-12 col-sm-4">
                         <label class="form-label text-muted small">Category *</label>
                         <select id="category" class="form-select form-control-glass" required>
                             {% for cat in categories %}
@@ -25,11 +25,23 @@
                         </select>
                     </div>
 
-                    <div class="col-12 col-sm-6">
+                    <div class="col-12 col-sm-4">
                         <label class="form-label text-muted small">Venue *</label>
                         <select id="venue" class="form-select form-control-glass" required>
                             {% for v in venues %}
                                 <option value="{{ v.venue_id }}" {% if v.venue_id == event.venue.venue_id %}selected{% endif %}>{{ v.venue_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label text-white fw-bold"><i class="bi bi-building text-info me-1"></i>Conducting Department *</label>
+                        <select id="department" class="form-select form-control-glass" required>
+                            <option value="">Select Conducting Department</option>
+                            {% for dept in departments %}
+                                <option value="{{ dept.id }}" {% if event.department and event.department.id == dept.id %}selected{% endif %}>
+                                    {{ dept.name }} ({{ dept.code }})
+                                </option>
                             {% endfor %}
                         </select>
                     </div>
@@ -213,6 +225,7 @@
         formData.append('title', document.getElementById('title').value.trim());
         formData.append('category', document.getElementById('category').value);
         formData.append('venue', document.getElementById('venue').value);
+        formData.append('department', document.getElementById('department').value);
         formData.append('date', document.getElementById('date').value);
         formData.append('time', document.getElementById('time').value);
         formData.append('max_participants', parseInt(document.getElementById('max_participants').value));

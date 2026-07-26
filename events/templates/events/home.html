@@ -162,6 +162,10 @@
 
                                 <div class="d-flex flex-column gap-2 mb-3">
                                     <div class="event-meta-item">
+                                        <i class="bi bi-building text-info me-2"></i>
+                                        <span>Dept: <strong class="text-info">{{ event.department.name|default:event.organizer.department.name|default:"Campus Dept" }}</strong></span>
+                                    </div>
+                                    <div class="event-meta-item">
                                         <i class="bi bi-calendar-check-fill text-primary me-2"></i>
                                         <span>{{ event.date|date:"d M Y" }} &bull; {{ event.time|time:"h:i A" }}</span>
                                     </div>

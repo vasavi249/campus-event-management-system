@@ -271,10 +271,12 @@ def edit_event_view(request, id):
         
     categories = Category.objects.all()
     venues = Venue.objects.all()
+    departments = Department.objects.all()
     return render(request, 'events/edit_event.html', {
         'event': event,
         'categories': categories,
-        'venues': venues
+        'venues': venues,
+        'departments': departments
     })
 
 @login_required
@@ -448,16 +450,11 @@ def api_logout(request):
 @permission_classes([AllowAny])
 def api_forgot_password(request):
     email = request.data.get('email')
-    user = User.objects.filter(email=email).first()
-    if not user:
-        return api_response('error', 'No user account found with that email address.', http_status=status.HTTP_404_NOT_FOUND)
-
-    Notification.objects.create(
-        user=user,
-        title="Password Reset Request",
-        message="A password reset request was initiated for your account. Please contact campus admin."
-    )
-    return api_response('success', f'Password reset link sent to {email}.')
+    if email:
+        user = User.objects.filter(email__iexact=email.strip()).first()
+        if user:
+            return api_response('success', f"Password reset instructions sent to {email}.")
+    return api_response('error', 'Email address not found.', http_status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['POST'])
@@ -474,7 +471,7 @@ def api_change_password(request):
     return api_response('success', 'Password changed successfully.')
 
 
-@api_view(['GET', 'PUT', 'POST'])
+@api_view(['GET', 'PUT'])
 @permission_classes([IsAuthenticated])
 def api_profile(request):
     user = request.user
@@ -482,21 +479,19 @@ def api_profile(request):
         serializer = CustomUserSerializer(user)
         return api_response('success', 'Profile retrieved.', serializer.data)
 
-    data = request.data
-    first_name = data.get('first_name')
-    last_name = data.get('last_name')
-    email = data.get('email')
-    phone = data.get('phone')
-    roll_number = data.get('roll_number')
-    dept_id = data.get('department')
-    club_id = data.get('club')
-    new_password = data.get('new_password')
+    first_name = request.data.get('first_name')
+    last_name = request.data.get('last_name')
+    email = request.data.get('email')
+    phone = request.data.get('phone')
+    roll_number = request.data.get('roll_number')
+    dept_id = request.data.get('department')
+    club_id = request.data.get('club')
+    new_password = request.data.get('new_password')
 
     if first_name is not None:
         user.first_name = first_name.strip()
     if last_name is not None:
         user.last_name = last_name.strip()
-
     if email:
         if User.objects.filter(email__iexact=email.strip()).exclude(pk=user.pk).exists():
             return api_response('error', 'Email is already registered by another account.', http_status=status.HTTP_400_BAD_REQUEST)
@@ -605,8 +600,12 @@ def api_events(request):
     try:
         data = {k: v for k, v in request.data.items()}
         data['organizer'] = request.user.id
-        if getattr(request.user, 'department_id', None):
+        dept_val = request.data.get('department')
+        if dept_val:
+            data['department'] = dept_val
+        elif getattr(request.user, 'department_id', None):
             data['department'] = request.user.department_id
+
         if getattr(request.user, 'club_id', None):
             data['club'] = request.user.club_id
 

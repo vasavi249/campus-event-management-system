@@ -37,9 +37,14 @@
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="badge badge-indigo-glass fs-6">
-                    <i class="bi bi-tag-fill me-1"></i>{{ event.category.name }}
-                </span>
+                <div class="d-flex gap-2 align-items-center">
+                    <span class="badge badge-indigo-glass fs-6">
+                        <i class="bi bi-tag-fill me-1"></i>{{ event.category.name }}
+                    </span>
+                    <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-25 fs-6">
+                        <i class="bi bi-building me-1"></i>Dept: {{ event.department.name|default:event.organizer.department.name|default:"Campus Department" }}
+                    </span>
+                </div>
                 <span class="badge {% if event.approval_status == 'approved' %}badge-approved{% else %}badge-pending{% endif %}">
                     {{ event.approval_status|title }}
                 </span>
@@ -49,13 +54,18 @@
 
             <!-- Highlighted Detailed Event Description Card -->
             <div class="glass-card bg-dark bg-opacity-75 p-4 rounded-3 mb-4 border border-primary border-opacity-25 shadow-lg">
-                <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-secondary border-opacity-50 pb-2">
+                <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-secondary border-opacity-50 pb-2 flex-wrap gap-2">
                     <h5 class="fw-bold text-white mb-0">
                         <i class="bi bi-file-text text-primary me-2 fs-5"></i>Event Overview &amp; Complete Description
                     </h5>
-                    <span class="badge bg-primary bg-opacity-25 text-info border border-primary border-opacity-25 px-3 py-1">
-                        <i class="bi bi-person-circle me-1"></i>Organized by {{ event.organizer.full_name }}
-                    </span>
+                    <div class="d-flex gap-2 align-items-center">
+                        <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-25 px-3 py-1">
+                            <i class="bi bi-building me-1"></i>Conducting Dept: {{ event.department.name|default:event.organizer.department.name|default:"Campus Department" }}
+                        </span>
+                        <span class="badge bg-primary bg-opacity-25 text-info border border-primary border-opacity-25 px-3 py-1">
+                            <i class="bi bi-person-circle me-1"></i>By {{ event.organizer.full_name }}
+                        </span>
+                    </div>
                 </div>
                 <div class="text-secondary leading-relaxed fs-6" style="white-space: pre-line; line-height: 1.75;">
                     {{ event.description }}
@@ -82,19 +92,23 @@
             <!-- Detailed Event Info Grid -->
             <h5 class="fw-bold text-white mb-3"><i class="bi bi-info-circle text-primary me-2"></i>Event Logistics &amp; Schedule</h5>
             <div class="row g-3 p-3 glass-card bg-dark bg-opacity-50 mb-4">
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-4">
+                    <small class="text-secondary d-block mb-1">Conducting Department</small>
+                    <span class="fw-bold text-info"><i class="bi bi-building text-info me-1"></i>{{ event.department.name|default:event.organizer.department.name|default:"Campus Department" }}</span>
+                </div>
+                <div class="col-6 col-md-2">
                     <small class="text-secondary d-block mb-1">Date</small>
                     <span class="fw-bold text-white"><i class="bi bi-calendar-event text-primary me-1"></i>{{ event.date }}</span>
                 </div>
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-2">
                     <small class="text-secondary d-block mb-1">Time</small>
                     <span class="fw-bold text-white"><i class="bi bi-clock text-info me-1"></i>{{ event.time|time:"h:i A" }}</span>
                 </div>
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-2">
                     <small class="text-secondary d-block mb-1">Venue</small>
                     <span class="fw-bold text-white"><i class="bi bi-geo-alt text-warning me-1"></i>{{ event.venue.venue_name|default:"TBA" }}</span>
                 </div>
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-2">
                     <small class="text-secondary d-block mb-1">Max Capacity</small>
                     <span class="fw-bold text-white"><i class="bi bi-people text-success me-1"></i>{{ event.max_participants }} Members</span>
                 </div>
