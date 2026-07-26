@@ -138,6 +138,27 @@
                         Cancel Registration
                     </button>
                 {% else %}
+                    <!-- About Event Summary Box before Registering -->
+                    <div class="p-3 glass-card bg-dark bg-opacity-75 mb-3 text-start border border-secondary border-opacity-25 rounded-3">
+                        <div class="d-flex align-items-center gap-2 mb-2 pb-1 border-bottom border-secondary border-opacity-25">
+                            <i class="bi bi-info-circle-fill text-primary"></i>
+                            <span class="text-white fw-bold small text-uppercase tracking-wider">About This Event</span>
+                        </div>
+                        <p class="text-secondary small mb-2" style="line-height: 1.5;">
+                            {{ event.description }}
+                        </p>
+                        {% if event.skills_list %}
+                            <div class="pt-2 border-top border-secondary border-opacity-25">
+                                <small class="text-warning fw-bold d-block mb-1" style="font-size:0.72rem;"><i class="bi bi-lightbulb me-1"></i>Skills You'll Gain:</small>
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% for skill in event.skills_list|slice:":3" %}
+                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25" style="font-size:0.7rem;">{{ skill }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
                     <div class="p-3 glass-card bg-dark bg-opacity-75 mb-3 text-start">
                         <small class="text-secondary d-block mb-1">Registration Fee</small>
                         <h3 class="fw-bold text-success mb-0">₹{{ event.registration_fee }} <small class="fs-6 text-secondary fw-normal">/ member</small></h3>
@@ -161,15 +182,31 @@
 
 <!-- Multi-Step Paid Event Registration Modal -->
 <div class="modal fade" id="paidRegistrationModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content glass-card p-4 text-white position-relative" style="background: rgba(15, 23, 42, 0.96); border: 1px solid rgba(255,255,255,0.2);">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-bold text-white" id="regModalTitle"><i class="bi bi-ticket-perforated text-primary me-2"></i>Event Registration</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body py-3">
-                <!-- STEP 1: Team Size Input -->
+                <!-- STEP 1: Event Description Summary & Team Size Input -->
                 <div id="regStep1">
+                    <!-- Event Overview Preview inside Modal before completing registration -->
+                    <div class="p-3 glass-card bg-dark bg-opacity-75 mb-3 border border-primary border-opacity-25 rounded-3 text-start">
+                        <div class="d-flex align-items-center justify-content-between mb-2 border-bottom border-secondary border-opacity-50 pb-2">
+                            <span class="fw-bold text-white fs-6"><i class="bi bi-file-text text-primary me-2"></i>{{ event.title }} - Description &amp; Overview</span>
+                            <span class="badge badge-indigo-glass">{{ event.category.name }}</span>
+                        </div>
+                        <p class="text-secondary small mb-2" style="white-space: pre-line; max-height: 140px; overflow-y: auto; line-height: 1.5;">
+                            {{ event.description }}
+                        </p>
+                        <div class="d-flex flex-wrap gap-3 text-info small pt-2 border-top border-secondary border-opacity-25">
+                            <span><i class="bi bi-calendar-event text-primary me-1"></i>{{ event.date }}</span>
+                            <span><i class="bi bi-clock text-info me-1"></i>{{ event.time|time:"h:i A" }}</span>
+                            <span><i class="bi bi-geo-alt text-warning me-1"></i>{{ event.venue.venue_name|default:"Campus Venue" }}</span>
+                        </div>
+                    </div>
+
                     <p class="text-secondary small mb-3">Select the number of members registering for this event.</p>
                     <div class="mb-3">
                         <label class="form-label text-white">How many members are registering? *</label>
