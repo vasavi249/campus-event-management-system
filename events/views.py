@@ -56,18 +56,12 @@ from django.views.static import serve as django_serve
 
 def safe_media_serve(request, path):
     """
-    Safely serves uploaded media files directly from MEDIA_ROOT.
-    If requested file does not exist on disk, serves sample_proof.png fallback image.
+    Serves uploaded media files directly from MEDIA_ROOT.
     """
     full_path = os.path.join(settings.MEDIA_ROOT, path)
     if os.path.exists(full_path) and os.path.isfile(full_path):
         return django_serve(request, path, document_root=settings.MEDIA_ROOT)
-    
-    fallback_path = os.path.join(settings.MEDIA_ROOT, 'payment_screenshots', 'sample_proof.png')
-    if os.path.exists(fallback_path) and os.path.isfile(fallback_path):
-        return django_serve(request, 'payment_screenshots/sample_proof.png', document_root=settings.MEDIA_ROOT)
-    
-    return HttpResponse("Payment screenshot file not found.", status=404)
+    return HttpResponse("Payment screenshot file not found on server.", status=404)
 
 # Custom 404 View
 def custom_404_view(request, exception=None):
