@@ -106,6 +106,22 @@ class Event(models.Model):
             return [s.strip() for s in self.skills_learned.split(',') if s.strip()]
         return []
 
+    @property
+    def department_name(self):
+        if self.department and getattr(self.department, 'name', None):
+            return self.department.name
+        if self.organizer and getattr(self.organizer, 'department', None) and getattr(self.organizer.department, 'name', None):
+            return self.organizer.department.name
+        return "Campus Department"
+
+    @property
+    def department_code(self):
+        if self.department and getattr(self.department, 'code', None):
+            return self.department.code
+        if self.organizer and getattr(self.organizer, 'department', None) and getattr(self.organizer.department, 'code', None):
+            return self.organizer.department.code
+        return "CAMPUS"
+
     def clean(self):
         if self.deadline and self.date and self.time:
             dt_combined = timezone.datetime.combine(self.date, self.time)
