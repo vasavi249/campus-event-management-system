@@ -139,6 +139,7 @@ def populate():
             'deadline': timezone.now() + timedelta(days=5),
             'max_participants': 100,
             'registration_fee': 250.00,
+            'skills_learned': "Full-Stack Web Dev, Rapid Prototyping, AI Integration, Team Leadership, Pitching & Demo",
             'status': 'published',
             'approval_status': 'approved',
             'organizer': organizer_user,
@@ -158,6 +159,7 @@ def populate():
             'deadline': timezone.now() + timedelta(days=10),
             'max_participants': 50,
             'registration_fee': 150.00,
+            'skills_learned': "Python Programming, PyTorch, Neural Networks, Model Fine-Tuning, Data Preprocessing",
             'status': 'published',
             'approval_status': 'approved',
             'organizer': organizer_user,
@@ -177,6 +179,7 @@ def populate():
             'deadline': timezone.now() + timedelta(days=14),
             'max_participants': 400,
             'registration_fee': 100.00,
+            'skills_learned': "Stage Performance, Event Management, Public Relations, Creative Design, Team Collaboration",
             'status': 'published',
             'approval_status': 'pending',
             'organizer': organizer_user,
@@ -187,14 +190,17 @@ def populate():
 
     event1.banner_image = 'event_banners/tech_banner.png'
     event1.registration_fee = 250.00
+    event1.skills_learned = "Full-Stack Web Dev, Rapid Prototyping, AI Integration, Team Leadership, Pitching & Demo"
     event1.save()
 
     event2.banner_image = 'event_banners/workshop_banner.png'
     event2.registration_fee = 150.00
+    event2.skills_learned = "Python Programming, PyTorch, Neural Networks, Model Fine-Tuning, Data Preprocessing"
     event2.save()
 
     event3.banner_image = 'event_banners/cultural_banner.png'
     event3.registration_fee = 100.00
+    event3.skills_learned = "Stage Performance, Event Management, Public Relations, Creative Design, Team Collaboration"
     event3.approval_status = 'approved'
     event3.save()
 

@@ -144,6 +144,22 @@
                                     <p class="text-secondary small mb-0 line-clamp-3" style="line-height: 1.5;">{{ event.description|truncatewords:30 }}</p>
                                 </div>
 
+                                {% if event.skills_list %}
+                                    <div class="mb-3">
+                                        <small class="text-warning fw-bold d-block mb-1 text-uppercase tracking-wider" style="font-size:0.7rem;"><i class="bi bi-lightbulb me-1"></i>Skills You'll Gain:</small>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            {% for skill in event.skills_list|slice:":3" %}
+                                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25" style="font-size:0.75rem;">
+                                                    {{ skill }}
+                                                </span>
+                                            {% endfor %}
+                                            {% if event.skills_list|length > 3 %}
+                                                <span class="badge bg-secondary opacity-75" style="font-size:0.75rem;">+{{ event.skills_list|length|add:"-3" }} more</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
                                 <div class="d-flex flex-column gap-2 mb-3">
                                     <div class="event-meta-item">
                                         <i class="bi bi-calendar-check-fill text-primary me-2"></i>

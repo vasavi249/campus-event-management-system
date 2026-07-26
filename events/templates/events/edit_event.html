@@ -54,6 +54,12 @@
                         <input type="number" id="registration_fee" class="form-control form-control-glass" value="{{ event.registration_fee }}" step="0.01" min="0">
                     </div>
 
+                    <div class="col-12">
+                        <label class="form-label text-white fw-bold"><i class="bi bi-lightbulb text-warning me-1"></i>Skills Students Will Learn &amp; Gain (Comma Separated)</label>
+                        <input type="text" id="skills_learned" class="form-control form-control-glass" value="{{ event.skills_learned|default:'' }}" placeholder="e.g. Python, Artificial Intelligence, Web Development, Team Leadership, Public Speaking">
+                        <div class="form-text text-muted small">Enter key technical or soft skills students will gain by participating in this event.</div>
+                    </div>
+
                     <div class="col-12 col-md-4">
                         <label class="form-label text-white fw-bold"><i class="bi bi-image text-info me-1"></i>Event Banner / Poster</label>
                         <input type="file" id="banner_image" class="form-control form-control-glass" accept="image/*" onchange="previewEditBannerImage(event)">
@@ -210,6 +216,7 @@
         formData.append('time', document.getElementById('time').value);
         formData.append('max_participants', parseInt(document.getElementById('max_participants').value));
         formData.append('registration_fee', parseFloat(document.getElementById('registration_fee').value || 0));
+        formData.append('skills_learned', document.getElementById('skills_learned').value.trim());
         formData.append('description', document.getElementById('description').value.trim());
 
         const fileInput = document.getElementById('banner_image');

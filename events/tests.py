@@ -59,6 +59,22 @@ class CampusEventSystemTests(TestCase):
         with self.assertRaises(ValidationError):
             invalid_event.clean()
 
+    def test_event_skills_learned_property(self):
+        event_date = timezone.now().date() + timedelta(days=5)
+        event_time = timezone.now().time()
+        deadline = timezone.now() + timedelta(days=3)
+        
+        event = Event.objects.create(
+            title="Python AI Bootcamp", category=self.category, description="AI Skills Event", 
+            venue=self.venue, date=event_date, time=event_time, 
+            deadline=deadline, max_participants=50, organizer=self.organizer,
+            department=self.dept, club=self.club, status="published", approval_status="approved",
+            skills_learned="Python, PyTorch, Artificial Intelligence"
+        )
+        self.assertEqual(len(event.skills_list), 3)
+        self.assertIn("Python", event.skills_list)
+        self.assertIn("PyTorch", event.skills_list)
+
     def test_student_registration_and_capacity(self):
         event_date = timezone.now().date() + timedelta(days=5)
         event_time = timezone.now().time()

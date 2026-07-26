@@ -98,6 +98,13 @@ class Event(models.Model):
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True, related_name='events')
     club = models.ForeignKey(Club, on_delete=models.SET_NULL, null=True, blank=True, related_name='events')
     registration_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    skills_learned = models.CharField(max_length=300, blank=True, null=True, help_text="Comma-separated list of skills learned e.g. Python, AI, Leadership")
+
+    @property
+    def skills_list(self):
+        if self.skills_learned:
+            return [s.strip() for s in self.skills_learned.split(',') if s.strip()]
+        return []
 
     def clean(self):
         if self.deadline and self.date and self.time:

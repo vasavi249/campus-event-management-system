@@ -42,6 +42,7 @@ class EventSerializer(serializers.ModelSerializer):
     banner_image_url = serializers.SerializerMethodField()
     certificate_template_url = serializers.SerializerMethodField()
     payment_scanner_url = serializers.SerializerMethodField()
+    skills_list = serializers.ReadOnlyField()
 
     class Meta:
         model = Event
