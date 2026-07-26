@@ -137,7 +137,12 @@
                                 </div>
 
                                 <h4 class="fw-bold text-white mb-2 fs-4">{{ event.title }}</h4>
-                                <p class="text-secondary small mb-3 line-clamp-2" style="min-height: 2.4rem;">{{ event.description|truncatewords:18 }}</p>
+                                
+                                <!-- Detailed Event Overview Section -->
+                                <div class="glass-card bg-dark bg-opacity-50 p-2.5 rounded-3 mb-3 border border-secondary border-opacity-25">
+                                    <small class="text-info fw-bold d-block mb-1 text-uppercase tracking-wider" style="font-size:0.75rem;"><i class="bi bi-info-circle me-1"></i>About Event</small>
+                                    <p class="text-secondary small mb-0 line-clamp-3" style="line-height: 1.5;">{{ event.description|truncatewords:30 }}</p>
+                                </div>
 
                                 <div class="d-flex flex-column gap-2 mb-3">
                                     <div class="event-meta-item">
@@ -158,7 +163,7 @@
                             <div class="pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
                                 <span class="text-secondary small"><i class="bi bi-person-fill me-1 text-primary"></i>{{ event.organizer.username }}</span>
                                 <a href="{% url 'event_detail_page' event.event_id %}" class="btn btn-glass-primary btn-sm px-3 py-2">
-                                    View Details <i class="bi bi-arrow-right ms-1"></i>
+                                    Read Full Details &amp; Register <i class="bi bi-arrow-right ms-1"></i>
                                 </a>
                             </div>
                         </div>

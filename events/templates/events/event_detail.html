@@ -46,7 +46,21 @@
             </div>
 
             <h1 class="fw-bold text-white mb-3 fs-2">{{ event.title }}</h1>
-            <p class="text-secondary leading-relaxed mb-4 fs-5">{{ event.description }}</p>
+
+            <!-- Highlighted Detailed Event Description Card -->
+            <div class="glass-card bg-dark bg-opacity-75 p-4 rounded-3 mb-4 border border-primary border-opacity-25 shadow-lg">
+                <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-secondary border-opacity-50 pb-2">
+                    <h5 class="fw-bold text-white mb-0">
+                        <i class="bi bi-file-text text-primary me-2 fs-5"></i>Event Overview &amp; Complete Description
+                    </h5>
+                    <span class="badge bg-primary bg-opacity-25 text-info border border-primary border-opacity-25 px-3 py-1">
+                        <i class="bi bi-person-circle me-1"></i>Organized by {{ event.organizer.full_name }}
+                    </span>
+                </div>
+                <div class="text-secondary leading-relaxed fs-6" style="white-space: pre-line; line-height: 1.75;">
+                    {{ event.description }}
+                </div>
+            </div>
 
             <!-- Detailed Event Info Grid -->
             <h5 class="fw-bold text-white mb-3"><i class="bi bi-info-circle text-primary me-2"></i>Event Logistics &amp; Schedule</h5>
