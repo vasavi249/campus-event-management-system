@@ -94,21 +94,21 @@
                     {% if event.skills_list %}
                         <div class="d-flex flex-wrap gap-2">
                             {% for skill in event.skills_list %}
-                                <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-30 px-3 py-2 fs-6 rounded-pill">
-                                    <i class="bi bi-patch-check-fill me-1"></i>{{ skill }}
+                                <span class="badge px-3 py-2 fs-6 rounded-pill text-white fw-bold shadow-sm" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.35), rgba(217, 119, 6, 0.45)); border: 1px solid rgba(251, 191, 36, 0.7); color: #ffffff !important;">
+                                    <i class="bi bi-patch-check-fill text-warning me-1.5"></i>{{ skill }}
                                 </span>
                             {% endfor %}
                         </div>
                     {% else %}
                         <div class="d-flex flex-wrap gap-2">
-                            <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-30 px-3 py-2 fs-6 rounded-pill">
-                                <i class="bi bi-patch-check-fill me-1"></i>Technical Problem Solving
+                            <span class="badge px-3 py-2 fs-6 rounded-pill text-white fw-bold shadow-sm" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.35), rgba(217, 119, 6, 0.45)); border: 1px solid rgba(251, 191, 36, 0.7); color: #ffffff !important;">
+                                <i class="bi bi-patch-check-fill text-warning me-1.5"></i>Technical Problem Solving
                             </span>
-                            <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-30 px-3 py-2 fs-6 rounded-pill">
-                                <i class="bi bi-patch-check-fill me-1"></i>Team Collaboration
+                            <span class="badge px-3 py-2 fs-6 rounded-pill text-white fw-bold shadow-sm" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.35), rgba(217, 119, 6, 0.45)); border: 1px solid rgba(251, 191, 36, 0.7); color: #ffffff !important;">
+                                <i class="bi bi-patch-check-fill text-warning me-1.5"></i>Team Collaboration
                             </span>
-                            <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-30 px-3 py-2 fs-6 rounded-pill">
-                                <i class="bi bi-patch-check-fill me-1"></i>Hands-On Practical Skills
+                            <span class="badge px-3 py-2 fs-6 rounded-pill text-white fw-bold shadow-sm" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.35), rgba(217, 119, 6, 0.45)); border: 1px solid rgba(251, 191, 36, 0.7); color: #ffffff !important;">
+                                <i class="bi bi-patch-check-fill text-warning me-1.5"></i>Hands-On Practical Skills
                             </span>
                         </div>
                     {% endif %}
@@ -192,7 +192,7 @@
                                 <small class="text-warning fw-bold d-block mb-1" style="font-size:0.72rem;"><i class="bi bi-lightbulb me-1"></i>Skills You'll Gain:</small>
                                 <div class="d-flex flex-wrap gap-1">
                                     {% for skill in event.skills_list|slice:":3" %}
-                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25" style="font-size:0.7rem;">{{ skill }}</span>
+                                        <span class="badge px-2 py-1 rounded-pill text-white fw-bold" style="background: rgba(245, 158, 11, 0.3); border: 1px solid rgba(251, 191, 36, 0.6); color: #ffffff !important; font-size:0.7rem;">{{ skill }}</span>
                                     {% endfor %}
                                 </div>
                             </div>
