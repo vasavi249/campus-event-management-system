@@ -6,8 +6,10 @@ from django.conf.urls.static import static
 from django.views.static import serve
 from django.urls import re_path
 
+from events.views import safe_media_serve
+
 urlpatterns = [
-    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    re_path(r'^media/(?P<path>.*)$', safe_media_serve),
     path('admin/', admin.site.urls),
     path('', include('events.urls')),
 ]

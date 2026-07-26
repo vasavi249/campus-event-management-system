@@ -21,6 +21,13 @@ media/payment_screenshots/*
 !media/payment_screenshots/.gitkeep
 !media/event_banners/*.png
 !media/event_banners/*.jpg
+!media/payment_screenshots/*.png
+!media/payment_screenshots/*.jpg
+!media/payment_screenshots/*.jpeg
+!media/payment_screenshots/*.gif
+!media/payment_scanners/*.png
+!media/payment_scanners/*.jpg
+!media/payment_scanners/*.jpeg
 
 # Environment variables & local IDE settings
 .env

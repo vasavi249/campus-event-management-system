@@ -52,6 +52,29 @@ def safe_get_object_or_404(klass, *args, **kwargs):
     except (ValueError, TypeError, DjangoValidationError):
         raise Http404(f"Object not found in {klass.__name__}.")
 
+from django.views.static import serve as django_serve
+
+def safe_media_serve(request, path):
+    """
+    Safely serves media files. If requested file does not exist on disk, 
+    returns a clean SVG placeholder image instead of raising a 404 error page.
+    """
+    full_path = os.path.join(settings.MEDIA_ROOT, path)
+    if os.path.exists(full_path) and os.path.isfile(full_path):
+        return django_serve(request, path, document_root=settings.MEDIA_ROOT)
+    
+    # SVG Placeholder Image for Missing Media Files
+    file_name = os.path.basename(path)
+    svg_content = f"""<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
+        <rect width="600" height="400" fill="#0B0F17"/>
+        <rect x="20" y="20" width="560" height="360" rx="16" fill="#1E293B" stroke="#4F46E5" stroke-width="2" stroke-dasharray="8 8"/>
+        <path d="M260 150 L300 190 L340 150 M300 190 L300 120" stroke="#818CF8" stroke-width="4" stroke-linecap="round"/>
+        <text x="300" y="230" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Payment Proof Screenshot</text>
+        <text x="300" y="260" font-family="system-ui, sans-serif" font-size="13" fill="#94A3B8" text-anchor="middle">{file_name}</text>
+        <text x="300" y="290" font-family="system-ui, sans-serif" font-size="12" fill="#F43F5E" text-anchor="middle">File not present on server disk &bull; Pending re-upload</text>
+    </svg>"""
+    return HttpResponse(svg_content, content_type="image/svg+xml")
+
 # Custom 404 View
 def custom_404_view(request, exception=None):
     if request.path.startswith('/api/'):
