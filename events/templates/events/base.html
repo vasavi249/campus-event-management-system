@@ -280,6 +280,50 @@
         {% endif %}
     </script>
 
+    <!-- Payment Proof Image Lightbox Modal -->
+    <div class="modal fade" id="paymentProofModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content glass-card p-4 text-white text-center" style="background: rgba(15, 23, 42, 0.96); border: 1px solid rgba(255,255,255,0.2);">
+                <div class="modal-header border-0 pb-2">
+                    <h5 class="modal-title fw-bold text-white"><i class="bi bi-file-earmark-image text-info me-2"></i>Payment Screenshot Proof</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3">
+                    <p class="text-secondary small mb-3" id="proofStudentName">Uploaded Payment Screenshot</p>
+                    <div class="p-3 glass-card bg-dark bg-opacity-75 rounded-3 mb-3 border border-secondary border-opacity-25 text-center">
+                        <img id="proofModalImage" src="" alt="Payment Proof" class="img-fluid rounded-3" style="max-height: 65vh; object-fit: contain;">
+                    </div>
+                    <div class="d-flex justify-content-between gap-2">
+                        <a id="proofDownloadLink" href="" target="_blank" class="btn btn-glass-secondary px-4"><i class="bi bi-box-arrow-up-right me-1"></i>Open Direct Image Link</a>
+                        <button type="button" class="btn btn-glass-primary px-4" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showProofModal(imgUrl, studentName) {
+            if (!imgUrl) {
+                showToast('Payment screenshot URL is not available.', 'error');
+                return;
+            }
+            const img = document.getElementById('proofModalImage');
+            const link = document.getElementById('proofDownloadLink');
+            const subtitle = document.getElementById('proofStudentName');
+
+            if (img) img.src = imgUrl;
+            if (link) link.href = imgUrl;
+            if (subtitle) subtitle.textContent = 'Uploaded Payment Proof by ' + (studentName || 'Student');
+
+            const modalEl = document.getElementById('paymentProofModal');
+            if (modalEl) {
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            }
+        }
+    </script>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

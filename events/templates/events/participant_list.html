@@ -47,9 +47,9 @@
                                     <td class="small text-muted">{{ reg.registration_date|date:"M d, Y H:i" }}</td>
                                     <td>
                                         {% if reg.payment_screenshot %}
-                                            <a href="{{ reg.payment_screenshot.url }}" target="_blank" class="btn btn-outline-info btn-sm">
+                                            <button type="button" class="btn btn-outline-info btn-sm" onclick="showProofModal('{{ reg.payment_screenshot.url|escapejs }}', '{{ reg.student.full_name|escapejs }}')">
                                                 <i class="bi bi-file-earmark-image me-1"></i>View Proof
-                                            </a>
+                                            </button>
                                         {% else %}
                                             <span class="badge bg-secondary opacity-75 small">No Screenshot</span>
                                         {% endif %}

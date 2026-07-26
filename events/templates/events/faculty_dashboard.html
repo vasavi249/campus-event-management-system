@@ -242,7 +242,7 @@
                     }
 
                     const proofBtn = item.payment_screenshot_url 
-                        ? `<a href="${item.payment_screenshot_url}" target="_blank" class="btn btn-outline-info btn-sm"><i class="bi bi-file-earmark-image me-1"></i>View Proof</a>`
+                        ? `<button type="button" class="btn btn-outline-info btn-sm" onclick="showProofModal('${item.payment_screenshot_url}', '${s.full_name || s.username}')"><i class="bi bi-file-earmark-image me-1"></i>View Proof</button>`
                         : '<span class="badge bg-secondary opacity-75 small">No Screenshot</span>';
 
                     html += `
