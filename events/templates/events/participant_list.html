@@ -32,6 +32,7 @@
                                 <th>Department</th>
                                 <th>Ticket Code</th>
                                 <th>Registration Date</th>
+                                <th>Payment Proof</th>
                                 <th>Attendance Status</th>
                             </tr>
                         </thead>
@@ -44,6 +45,15 @@
                                     <td>{% if reg.student.department %}{{ reg.student.department.code }}{% else %}N/A{% endif %}</td>
                                     <td><span class="badge bg-secondary font-monospace">{{ reg.ticket_code }}</span></td>
                                     <td class="small text-muted">{{ reg.registration_date|date:"M d, Y H:i" }}</td>
+                                    <td>
+                                        {% if reg.payment_screenshot %}
+                                            <a href="{{ reg.payment_screenshot.url }}" target="_blank" class="btn btn-outline-info btn-sm">
+                                                <i class="bi bi-file-earmark-image me-1"></i>View Proof
+                                            </a>
+                                        {% else %}
+                                            <span class="badge bg-secondary opacity-75 small">No Screenshot</span>
+                                        {% endif %}
+                                    </td>
                                     <td>
                                         {% if reg.attendance == 'present' %}
                                             <span class="badge badge-approved"><i class="bi bi-check-circle me-1"></i>Present</span>

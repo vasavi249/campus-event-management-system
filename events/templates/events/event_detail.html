@@ -157,21 +157,33 @@
                 </div>
 
                 <!-- STEP 2: QR Payment Screen -->
+                <!-- STEP 2: QR Payment & Verification Screenshot Upload Screen -->
                 <div id="regStep2" style="display: none;">
                     <div class="text-center mb-3">
-                        <span class="badge badge-warning-glass px-3 py-1 mb-2">Simulated Payment Gateway</span>
+                        <span class="badge badge-warning-glass px-3 py-1 mb-2" id="payGatewayBadge">Payment &amp; Transaction Scanner</span>
                         <h5 class="fw-bold text-white mb-1" id="payEventTitle">{{ event.title }}</h5>
-                        <p class="text-secondary small">Scan QR Code or confirm payment below</p>
+                        <p class="text-secondary small">Scan QR Code, complete payment, and upload payment screenshot below</p>
                     </div>
 
                     <div class="text-center p-3 glass-card bg-dark bg-opacity-75 mb-3">
-                        <img id="payQrImage" src="" alt="Payment QR Code" class="img-fluid rounded-3 mb-2 border border-secondary p-2 bg-white" style="max-width: 220px;">
+                        <img id="payQrImage" src="" alt="Payment QR Code" class="img-fluid rounded-3 mb-2 border border-secondary p-2 bg-white" style="max-width: 220px; max-height: 220px; object-fit: contain;">
                         <h3 class="fw-bold text-success mb-1" id="payTotalDisplay">₹0.00</h3>
-                        <p class="text-secondary small mb-0"><span id="payMembersCount">1</span> Member(s) &bull; Ref: SIM-UPI-DEMO</p>
+                        <p class="text-secondary small mb-0"><span id="payMembersCount">1</span> Member(s) &bull; Official Campus Pay QR</p>
+                    </div>
+
+                    <!-- Payment Verification Upload Field -->
+                    <div class="mb-3 text-start glass-card p-3 bg-dark bg-opacity-50">
+                        <label class="form-label text-white fw-bold small"><i class="bi bi-file-earmark-image text-warning me-1"></i>Upload Payment Screenshot Proof *</label>
+                        <input type="file" id="payScreenshotFile" class="form-control form-control-glass text-white" accept="image/*" onchange="previewPayScreenshot(event)" required>
+                        <div class="form-text text-secondary small">Please upload a clear screenshot of your payment receipt / UPI confirmation screen.</div>
+                        <div id="pay-screenshot-preview-container" class="mt-2 text-center" style="display: none;">
+                            <small class="text-info d-block mb-1">Screenshot Preview:</small>
+                            <img id="pay-screenshot-preview" src="" alt="Payment Screenshot Preview" class="img-fluid rounded-3 border border-info" style="max-height: 140px; object-fit: contain;">
+                        </div>
                     </div>
 
                     <button type="button" class="btn btn-success w-100 py-2 fs-5 fw-bold" onclick="submitConfirmPayment()">
-                        <i class="bi bi-patch-check-fill me-2"></i>I've Completed Payment
+                        <i class="bi bi-patch-check-fill me-2"></i>Submit Payment Proof &amp; Complete Registration
                     </button>
                 </div>
 
@@ -180,7 +192,7 @@
                     <div class="text-center py-2">
                         <i class="bi bi-check-circle-fill text-success" style="font-size: 3.5rem;"></i>
                         <h4 class="fw-bold text-white mt-2">Registration Successful!</h4>
-                        <p class="text-secondary small mb-3">Your digital pass is ready and attendance request is submitted to your department faculty.</p>
+                        <p class="text-secondary small mb-3">Your payment screenshot proof has been submitted for organizer/faculty verification.</p>
 
                         <div class="glass-card bg-dark bg-opacity-75 p-3 text-start mb-3 space-y-2">
                             <div><small class="text-secondary">Event:</small> <strong class="text-white" id="succEventTitle">--</strong></div>
@@ -207,6 +219,23 @@
     let currentUnitFee = parseFloat("{{ event.registration_fee }}") || 0;
     let regModalInstance = null;
 
+    function previewPayScreenshot(event) {
+        const file = event.target.files[0];
+        const container = document.getElementById('pay-screenshot-preview-container');
+        const img = document.getElementById('pay-screenshot-preview');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                container.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
     function startPaidRegistration(eventId, fee, maxCap) {
         currentEventId = eventId;
         currentUnitFee = parseFloat(fee) || 0;
@@ -214,6 +243,8 @@
         document.getElementById('regNumMembers').value = 1;
         calculateTotalFee();
 
+        document.getElementById('payScreenshotFile').value = '';
+        document.getElementById('pay-screenshot-preview-container').style.display = 'none';
         document.getElementById('regStep1').style.display = 'block';
         document.getElementById('regStep2').style.display = 'none';
         document.getElementById('regStep3').style.display = 'none';
@@ -240,6 +271,12 @@
             document.getElementById('payTotalDisplay').innerText = `₹${res.data.total_amount.toFixed(2)}`;
             document.getElementById('payMembersCount').innerText = res.data.num_members;
 
+            if (res.data.has_custom_scanner) {
+                document.getElementById('payGatewayBadge').innerText = 'Official Event Organizer Scanner';
+            } else {
+                document.getElementById('payGatewayBadge').innerText = 'Payment & Transaction Scanner';
+            }
+
             document.getElementById('regStep1').style.display = 'none';
             document.getElementById('regStep2').style.display = 'block';
         } else {
@@ -248,13 +285,21 @@
     }
 
     async function submitConfirmPayment() {
+        const fileInput = document.getElementById('payScreenshotFile');
+        if (fileInput.files.length === 0) {
+            showToast('Please upload a screenshot of your payment receipt before submitting.', 'error');
+            return;
+        }
+
         const members = parseInt(document.getElementById('regNumMembers').value) || 1;
         const mockTxnId = 'PAY-TXN-' + Math.random().toString(36).substring(2, 10).toUpperCase();
 
-        const res = await apiCall(`/api/events/${currentEventId}/registration/confirm/`, 'POST', {
-            num_members: members,
-            payment_id: mockTxnId
-        });
+        const formData = new FormData();
+        formData.append('num_members', members);
+        formData.append('payment_id', mockTxnId);
+        formData.append('payment_screenshot', fileInput.files[0]);
+
+        const res = await apiCall(`/api/events/${currentEventId}/registration/confirm/`, 'POST', formData);
 
         if (res.success) {
             document.getElementById('succEventTitle').innerText = res.data.event_detail ? res.data.event_detail.title : 'Event';
@@ -265,7 +310,7 @@
 
             document.getElementById('regStep2').style.display = 'none';
             document.getElementById('regStep3').style.display = 'block';
-            showToast('Registration and payment confirmed!', 'success');
+            showToast('Registration and payment screenshot submitted!', 'success');
         } else {
             showToast(res.error || res.message || 'Payment confirmation failed.', 'error');
         }

@@ -223,6 +223,7 @@
                                     <th>Event Title</th>
                                     <th>Event Date</th>
                                     <th>Members</th>
+                                    <th>Payment Proof</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -240,6 +241,10 @@
                         statusBadge = '<span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Rejected</span>';
                     }
 
+                    const proofBtn = item.payment_screenshot_url 
+                        ? `<a href="${item.payment_screenshot_url}" target="_blank" class="btn btn-outline-info btn-sm"><i class="bi bi-file-earmark-image me-1"></i>View Proof</a>`
+                        : '<span class="badge bg-secondary opacity-75 small">No Screenshot</span>';
+
                     html += `
                         <tr>
                             <td class="fw-bold text-white">${s.full_name || s.username}</td>
@@ -247,6 +252,7 @@
                             <td class="fw-bold text-light">${e.title || 'Event'}</td>
                             <td class="small text-muted">${e.date || 'TBA'}</td>
                             <td><span class="badge bg-primary">${item.num_members}</span></td>
+                            <td>${proofBtn}</td>
                             <td>${statusBadge}</td>
                             <td>
                                 <div class="d-flex gap-2">

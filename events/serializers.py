@@ -41,6 +41,7 @@ class EventSerializer(serializers.ModelSerializer):
     is_full = serializers.SerializerMethodField()
     banner_image_url = serializers.SerializerMethodField()
     certificate_template_url = serializers.SerializerMethodField()
+    payment_scanner_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
@@ -60,6 +61,14 @@ class EventSerializer(serializers.ModelSerializer):
             if request:
                 return request.build_absolute_uri(obj.certificate_template.url)
             return obj.certificate_template.url
+        return None
+
+    def get_payment_scanner_url(self, obj):
+        if obj.payment_scanner:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.payment_scanner.url)
+            return obj.payment_scanner.url
         return None
 
     def get_registered_count(self, obj):
@@ -106,11 +115,20 @@ class RegistrationSerializer(serializers.ModelSerializer):
     student_detail = CustomUserSerializer(source='student', read_only=True)
     event_detail = EventSerializer(source='event', read_only=True)
     approved_by_detail = CustomUserSerializer(source='approved_by', read_only=True)
+    payment_screenshot_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Registration
         fields = '__all__'
         read_only_fields = ['ticket_code', 'registration_date']
+
+    def get_payment_screenshot_url(self, obj):
+        if obj.payment_screenshot:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.payment_screenshot.url)
+            return obj.payment_screenshot.url
+        return None
 
 class AttendanceSerializer(serializers.ModelSerializer):
     registration_detail = RegistrationSerializer(source='registration', read_only=True)

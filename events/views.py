@@ -610,7 +610,7 @@ def api_events(request):
         if getattr(request.user, 'club_id', None):
             data['club'] = request.user.club_id
 
-        for folder in ['event_banners', 'certificate_templates', 'certificates']:
+        for folder in ['event_banners', 'certificate_templates', 'certificates', 'payment_scanners', 'payment_screenshots']:
             os.makedirs(os.path.join(settings.MEDIA_ROOT, folder), exist_ok=True)
 
         if 'banner_image' in request.FILES:
@@ -622,6 +622,11 @@ def api_events(request):
             data['certificate_template'] = request.FILES['certificate_template']
         elif 'certificate_template' in data and not hasattr(data['certificate_template'], 'read'):
             del data['certificate_template']
+
+        if 'payment_scanner' in request.FILES:
+            data['payment_scanner'] = request.FILES['payment_scanner']
+        elif 'payment_scanner' in data and not hasattr(data['payment_scanner'], 'read'):
+            del data['payment_scanner']
 
         serializer = EventSerializer(data=data, context={'request': request})
         if serializer.is_valid():
@@ -679,6 +684,12 @@ def api_event_detail(request, pk):
                 event.certificate_template = None
                 event.save()
 
+        if request.data.get('remove_payment_scanner') == 'true' or request.data.get('remove_payment_scanner') is True:
+            if event.payment_scanner:
+                event.payment_scanner.delete(save=False)
+                event.payment_scanner = None
+                event.save()
+
         if 'banner_image' in request.FILES:
             data['banner_image'] = request.FILES['banner_image']
         elif 'banner_image' in data and not hasattr(data['banner_image'], 'read'):
@@ -688,6 +699,11 @@ def api_event_detail(request, pk):
             data['certificate_template'] = request.FILES['certificate_template']
         elif 'certificate_template' in data and not hasattr(data['certificate_template'], 'read'):
             del data['certificate_template']
+
+        if 'payment_scanner' in request.FILES:
+            data['payment_scanner'] = request.FILES['payment_scanner']
+        elif 'payment_scanner' in data and not hasattr(data['payment_scanner'], 'read'):
+            del data['payment_scanner']
 
         serializer = EventSerializer(event, data=data, partial=True, context={'request': request})
         if serializer.is_valid():
@@ -1046,9 +1062,12 @@ def api_initiate_registration(request, pk):
     unit_fee = float(event.registration_fee)
     total_amount = round(unit_fee * num_members, 2)
 
-    import urllib.parse
-    qr_text = f"Pay ₹{total_amount:.2f} for {event.title} ({num_members} member{'s' if num_members > 1 else ''})"
-    qr_code_url = f"https://quickchart.io/qr?text={urllib.parse.quote(qr_text)}&size=250"
+    if event.payment_scanner:
+        qr_code_url = request.build_absolute_uri(event.payment_scanner.url)
+    else:
+        import urllib.parse
+        qr_text = f"Pay ₹{total_amount:.2f} for {event.title} ({num_members} member{'s' if num_members > 1 else ''})"
+        qr_code_url = f"https://quickchart.io/qr?text={urllib.parse.quote(qr_text)}&size=250"
 
     return api_response('success', 'Registration initiated.', {
         'event_id': event.event_id,
@@ -1057,6 +1076,7 @@ def api_initiate_registration(request, pk):
         'unit_fee': unit_fee,
         'total_amount': total_amount,
         'qr_code_url': qr_code_url,
+        'has_custom_scanner': bool(event.payment_scanner),
         'remaining_seats': remaining_seats
     })
 
@@ -1086,6 +1106,11 @@ def api_confirm_registration(request, pk):
     if num_members > remaining_seats:
         return api_response('error', f'Registration failed: Only {remaining_seats} seat(s) remaining.', http_status=status.HTTP_400_BAD_REQUEST)
 
+    # Verification: Require payment screenshot proof for paid events / events with payment scanner
+    payment_screenshot = request.FILES.get('payment_screenshot')
+    if (event.registration_fee > 0 or event.payment_scanner) and not payment_screenshot:
+        return api_response('error', 'Payment screenshot proof is required to complete registration.', http_status=status.HTTP_400_BAD_REQUEST)
+
     import uuid
     payment_id = request.data.get('payment_id') or f"PAY-TXN-{uuid.uuid4().hex[:10].upper()}"
     unit_fee = float(event.registration_fee)
@@ -1100,6 +1125,8 @@ def api_confirm_registration(request, pk):
         existing.amount_paid = total_amount
         existing.payment_status = 'paid'
         existing.payment_id = payment_id
+        if payment_screenshot:
+            existing.payment_screenshot = payment_screenshot
         existing.attendance_status = 'pending'
         existing.save()
         reg = existing
@@ -1111,6 +1138,7 @@ def api_confirm_registration(request, pk):
             amount_paid=total_amount,
             payment_status='paid',
             payment_id=payment_id,
+            payment_screenshot=payment_screenshot,
             status='Confirmed',
             attendance_status='pending'
         )

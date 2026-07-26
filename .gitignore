@@ -12,9 +12,13 @@ __pycache__/
 media/event_banners/*
 media/certificate_templates/*
 media/certificates/*
+media/payment_scanners/*
+media/payment_screenshots/*
 !media/event_banners/.gitkeep
 !media/certificate_templates/.gitkeep
 !media/certificates/.gitkeep
+!media/payment_scanners/.gitkeep
+!media/payment_screenshots/.gitkeep
 !media/event_banners/*.png
 !media/event_banners/*.jpg
 

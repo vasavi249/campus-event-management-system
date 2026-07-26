@@ -54,35 +54,57 @@
                         <input type="number" id="registration_fee" class="form-control form-control-glass" value="{{ event.registration_fee }}" step="0.01" min="0">
                     </div>
 
-                    <div class="col-12 col-md-6">
-                        <label class="form-label text-white fw-bold"><i class="bi bi-image text-info me-1"></i>Event Banner / Poster Image</label>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label text-white fw-bold"><i class="bi bi-image text-info me-1"></i>Event Banner / Poster</label>
                         <input type="file" id="banner_image" class="form-control form-control-glass" accept="image/*" onchange="previewEditBannerImage(event)">
                         
                         {% if event.banner_image %}
                             <div class="mt-2" id="current-banner-box">
                                 <small class="text-muted d-block mb-1">Current Poster Banner:</small>
-                                <img id="edit-banner-preview" src="{{ event.banner_image.url }}" alt="Current Poster" class="img-fluid rounded-3 border border-secondary" style="max-height: 140px; object-fit: cover;">
+                                <img id="edit-banner-preview" src="{{ event.banner_image.url }}" alt="Current Poster" class="img-fluid rounded-3 border border-secondary" style="max-height: 120px; object-fit: cover;">
                                 <div class="mt-2">
                                     <button type="button" class="btn btn-outline-warning btn-sm" onclick="handleRemoveBanner()">
-                                        <i class="bi bi-x-circle me-1"></i>Remove Current Poster Image
+                                        <i class="bi bi-x-circle me-1"></i>Remove Poster
                                     </button>
                                 </div>
                             </div>
                         {% else %}
                             <div class="mt-2" id="current-banner-box" style="display: none;">
                                 <small class="text-muted d-block mb-1">New Poster Preview:</small>
-                                <img id="edit-banner-preview" src="" alt="Poster Preview" class="img-fluid rounded-3 border border-secondary" style="max-height: 140px; object-fit: cover;">
+                                <img id="edit-banner-preview" src="" alt="Poster Preview" class="img-fluid rounded-3 border border-secondary" style="max-height: 120px; object-fit: cover;">
                             </div>
                         {% endif %}
                     </div>
 
-                    <div class="col-12 col-md-6">
-                        <label class="form-label text-white fw-bold"><i class="bi bi-award text-warning me-1"></i>Event Certificate Template Background Image</label>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label text-white fw-bold"><i class="bi bi-qr-code-scan text-success me-1"></i>Payment Scanner / UPI QR</label>
+                        <input type="file" id="payment_scanner" class="form-control form-control-glass" accept="image/*" onchange="previewEditScannerImage(event)">
+                        
+                        {% if event.payment_scanner %}
+                            <div class="mt-2" id="current-scanner-box">
+                                <small class="text-muted d-block mb-1">Uploaded Payment Scanner:</small>
+                                <img id="edit-scanner-preview" src="{{ event.payment_scanner.url }}" alt="Payment Scanner" class="img-fluid rounded-3 border border-success" style="max-height: 120px; object-fit: cover;">
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-outline-warning btn-sm" onclick="handleRemoveScanner()">
+                                        <i class="bi bi-x-circle me-1"></i>Remove Scanner
+                                    </button>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="mt-2" id="current-scanner-box" style="display: none;">
+                                <small class="text-muted d-block mb-1">New Scanner Preview:</small>
+                                <img id="edit-scanner-preview" src="" alt="Scanner Preview" class="img-fluid rounded-3 border border-success" style="max-height: 120px; object-fit: cover;">
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <label class="form-label text-white fw-bold"><i class="bi bi-award text-warning me-1"></i>Certificate Template</label>
                         <input type="file" id="certificate_template" class="form-control form-control-glass" accept="image/*">
                         {% if event.certificate_template %}
                             <div class="mt-2">
                                 <small class="text-muted d-block mb-1">Uploaded Certificate Template Image:</small>
-                                <img src="{{ event.certificate_template.url }}" alt="Certificate Template" class="img-fluid rounded-3 border border-warning" style="max-height: 140px; object-fit: cover;">
+                                <img src="{{ event.certificate_template.url }}" alt="Certificate Template" class="img-fluid rounded-3 border border-warning" style="max-height: 120px; object-fit: cover;">
                             </div>
                         {% endif %}
                     </div>
@@ -122,6 +144,20 @@
         }
     }
 
+    async function handleRemoveScanner() {
+        if (!confirm('Are you sure you want to remove the payment scanner for this event?')) return;
+        const formData = new FormData();
+        formData.append('remove_payment_scanner', 'true');
+
+        const res = await apiCall('/api/events/{{ event.event_id }}/', 'PUT', formData);
+        if (res.success) {
+            showToast('Payment scanner image removed!', 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showToast(res.error || 'Failed to remove payment scanner.', 'error');
+        }
+    }
+
     async function handleDeleteEvent() {
         if (!confirm('Are you sure you want to PERMANENTLY DELETE this event? This action cannot be undone.')) return;
         const res = await apiCall('/api/events/{{ event.event_id }}/', 'DELETE');
@@ -132,10 +168,26 @@
             showToast(res.error || 'Failed to delete event.', 'error');
         }
     }
+
     function previewEditBannerImage(event) {
         const file = event.target.files[0];
         const box = document.getElementById('current-banner-box');
         const img = document.getElementById('edit-banner-preview');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                box.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function previewEditScannerImage(event) {
+        const file = event.target.files[0];
+        const box = document.getElementById('current-scanner-box');
+        const img = document.getElementById('edit-scanner-preview');
 
         if (file) {
             const reader = new FileReader();
@@ -163,6 +215,11 @@
         const fileInput = document.getElementById('banner_image');
         if (fileInput.files.length > 0) {
             formData.append('banner_image', fileInput.files[0]);
+        }
+
+        const scannerInput = document.getElementById('payment_scanner');
+        if (scannerInput && scannerInput.files.length > 0) {
+            formData.append('payment_scanner', scannerInput.files[0]);
         }
 
         const certInput = document.getElementById('certificate_template');

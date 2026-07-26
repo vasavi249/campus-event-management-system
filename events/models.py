@@ -91,6 +91,7 @@ class Event(models.Model):
     max_participants = models.PositiveIntegerField()
     banner_image = models.ImageField(upload_to='event_banners/', blank=True, null=True)
     certificate_template = models.ImageField(upload_to='certificate_templates/', blank=True, null=True)
+    payment_scanner = models.ImageField(upload_to='payment_scanners/', blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     approval_status = models.CharField(max_length=20, choices=APPROVAL_CHOICES, default='pending')
     organizer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='organized_events')
@@ -145,6 +146,7 @@ class Registration(models.Model):
         default='pending'
     )
     payment_id = models.CharField(max_length=100, blank=True, null=True)
+    payment_screenshot = models.ImageField(upload_to='payment_screenshots/', blank=True, null=True)
 
     # Department-Based Faculty Attendance Approval Workflow
     attendance_status = models.CharField(

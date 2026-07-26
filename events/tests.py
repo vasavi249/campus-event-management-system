@@ -133,15 +133,21 @@ class CampusEventSystemTests(TestCase):
         self.assertEqual(init_res.status_code, 200)
         self.assertEqual(init_res.json()['data']['total_amount'], 300.00)
 
-        # 2. Confirm Paid Registration
+        # 2. Confirm Paid Registration with Screenshot Proof
+        import base64
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        gif_bytes = base64.b64decode('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7')
+        uploaded_screenshot = SimpleUploadedFile("test_proof.gif", gif_bytes, content_type="image/gif")
+
         confirm_res = self.client.post(
             f'/api/events/{paid_event.event_id}/registration/confirm/',
-            {'num_members': 2, 'payment_id': 'PAY-TEST-999'}, content_type='application/json'
+            {'num_members': 2, 'payment_id': 'PAY-TEST-999', 'payment_screenshot': uploaded_screenshot}
         )
         self.assertEqual(confirm_res.status_code, 201)
         reg = Registration.objects.get(student=self.student, event=paid_event)
         self.assertEqual(reg.num_members, 2)
         self.assertEqual(float(reg.amount_paid), 300.00)
+        self.assertIsNotNone(reg.payment_screenshot)
         self.assertEqual(reg.attendance_status, 'pending')
 
         # 3. Department Faculty Views Pending Attendance
