@@ -83,21 +83,48 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'campus_event_manager.wsgi.application'
 
-try:
-    import dj_database_url
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
-            conn_max_age=600,
-        )
+SQLITE_CONFIG = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
-except ImportError:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+}
+
+database_url = os.environ.get('DATABASE_URL')
+use_sqlite = False
+
+if not database_url:
+    use_sqlite = True
+else:
+    try:
+        import socket
+        from urllib.parse import urlparse
+        parsed_db = urlparse(database_url)
+        db_host = parsed_db.hostname
+        if db_host:
+            orig_timeout = socket.getdefaulttimeout()
+            socket.setdefaulttimeout(3.0)
+            try:
+                socket.gethostbyname(db_host)
+            finally:
+                socket.setdefaulttimeout(orig_timeout)
+    except Exception as exc:
+        print(f"[DATABASE] Remote database host '{db_host}' is unreachable ({exc}). Falling back to SQLite.")
+        use_sqlite = True
+
+if use_sqlite:
+    DATABASES = SQLITE_CONFIG
+else:
+    try:
+        import dj_database_url
+        DATABASES = {
+            'default': dj_database_url.config(
+                default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+                conn_max_age=600,
+            )
         }
-    }
+    except ImportError:
+        DATABASES = SQLITE_CONFIG
 
 
 
